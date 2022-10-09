@@ -16,7 +16,7 @@ class CustomUserAdmin(UserAdmin):
         ('Account info', {'fields': ('username', 'email', 'password')}),
         ('Person\'s info', {'fields': ('first_name', 'last_name', 'age')}),
         ('Education', {'fields': ('stage_of_study', 'years_of_study')}),
-
+        ('Profile info', {'fields': ('profile_image', 'biography')}),
         ("Permissions", {"fields": (
             "is_active",
             "is_staff",

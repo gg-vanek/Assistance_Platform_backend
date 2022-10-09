@@ -7,6 +7,7 @@ class CustomUser(AbstractUser):
     # first_name = models.CharField(max_length=30)
     # last_name = models.CharField(max_length=30, blank=True)
     age = models.IntegerField(default=0)
+    biography = models.TextField(blank=True)
 
     STAGE_OF_STUDY_CHOICES = [
         ('N', 'None'),

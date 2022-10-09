@@ -13,6 +13,7 @@ class CustomUserCreationForm(UserCreationForm):
                   'age',
                   'stage_of_study',
                   'years_of_study',
+                  'biography',
                   'profile_image')
 
 
@@ -26,4 +27,5 @@ class CustomUserChangeForm(UserChangeForm):
                   'age',
                   'stage_of_study',
                   'years_of_study',
+                  'biography',
                   'profile_image')
