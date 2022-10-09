@@ -13,7 +13,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'age', 'stage_of_study', 'years_of_study')
 
     fieldsets = (
-        ('Account info', {'fields': ('username', 'email')}),
+        ('Account info', {'fields': ('username', 'email', 'password')}),
         ('Person\'s info', {'fields': ('first_name', 'last_name', 'age')}),
         ('Education', {'fields': ('stage_of_study', 'years_of_study')}),
 
