@@ -40,7 +40,16 @@ INSTALLED_APPS = [
 
     # Local
     'users.apps.UsersConfig',
+
+    # 3rd-party apps
+    'rest_framework',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
+}
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
