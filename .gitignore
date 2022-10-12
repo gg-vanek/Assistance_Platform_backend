@@ -130,3 +130,9 @@ dmypy.json
 
 # PyCharm
 .idea/
+
+# data folder
+# i want to save its struckture, but not the files
+data/**
+#!data/**/
+!data/**/.gitkeep

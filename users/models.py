@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
+import os
 
 
 class CustomUser(AbstractUser):
@@ -23,8 +25,8 @@ class CustomUser(AbstractUser):
     # сколько полных лет на текущей ступени обучения от 0 до ...
     # переименовать на course или типа того
     course_of_study = models.IntegerField(default=0)
-    profile_image = models.ImageField(blank=True)
-    profile_image_mini = models.ImageField(blank=True)
+    profile_image = models.ImageField(null=True, blank=True, upload_to=os.path.join(settings.BASE_DIR,
+                                                                                    'data/user_profile_images'))
 
     def __str__(self):
         return self.username
