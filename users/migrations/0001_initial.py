@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('age', models.IntegerField(default=0)),
                 ('stage_of_study', models.CharField(choices=[('N', 'None'), ('S', 'School'), ('C', 'College'), ('B', "bachelor's degree"), ('M', "master's degree"), ('PG', 'postgraduate study')], default='N', max_length=2)),
-                ('years_of_study', models.IntegerField(default=0)),
+                ('course_of_study', models.IntegerField(default=0)),
                 ('profile_image', models.ImageField(blank=True, upload_to='')),
                 ('profile_image_mini', models.ImageField(blank=True, upload_to='')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),

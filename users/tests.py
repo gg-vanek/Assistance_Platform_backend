@@ -20,7 +20,7 @@ class UserTests(TestCase):
         # last_name = 'Brown'
         # age = 18
         # stage_of_study = 'M'
-        # years_of_study= 5
+        # course_of_study= 5
 
         user = CustomUser.objects.get(id=1)
 
@@ -30,7 +30,7 @@ class UserTests(TestCase):
         last_name = f'{user.last_name}'
         age = f'{user.age}'
         stage_of_study = f'{user.stage_of_study}'
-        years_of_study = f'{user.years_of_study}'
+        years_of_study = f'{user.course_of_study}'
 
         self.assertEqual(username, 'testuser1')
         self.assertEqual(email, 'testuser1@etest.com')

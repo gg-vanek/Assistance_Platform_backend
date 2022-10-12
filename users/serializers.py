@@ -10,6 +10,6 @@ class UserSerializer(serializers.ModelSerializer):
                   'last_name',
                   'age',
                   'stage_of_study',
-                  'years_of_study',
+                  'course_of_study',
                   'biography',)
         model = CustomUser
