@@ -14,7 +14,9 @@ class CustomUserCreationForm(UserCreationForm):
                   'stage_of_study',
                   'course_of_study',
                   'biography',
-                  'profile_image')
+                  'profile_image',
+                  'contact_phone',
+                  'contact_email',)
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -28,4 +30,6 @@ class CustomUserChangeForm(UserChangeForm):
                   'stage_of_study',
                   'course_of_study',
                   'biography',
-                  'profile_image')
+                  'profile_image',
+                  'contact_phone',
+                  'contact_email',)

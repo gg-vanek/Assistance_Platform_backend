@@ -27,8 +27,8 @@ class CustomUser(AbstractUser):
     course_of_study = models.IntegerField(default=0)
     profile_image = models.ImageField(null=True, blank=True, upload_to=os.path.join(settings.BASE_DIR,
                                                                                     'data/user_profile_images'))
+    contact_phone = models.CharField(max_length=20, blank=True)
+    contact_email = models.EmailField(blank=True)
 
     def __str__(self):
         return self.username
-
-# ('username', 'email', 'first_name', 'last_name', 'age', 'stage_of_study', 'course_of_study', 'profile_image')

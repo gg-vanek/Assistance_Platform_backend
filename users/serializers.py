@@ -11,5 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
                   'age',
                   'stage_of_study',
                   'course_of_study',
-                  'biography',)
+                  'biography',
+                  'contact_phone',
+                  'contact_email',)
         model = CustomUser
