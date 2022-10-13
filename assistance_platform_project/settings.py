@@ -38,6 +38,7 @@ INSTALLED_APPS = [
 
     # Local
     'users.apps.UsersConfig',
+    'tasks.apps.TasksConfig',
 
     # 3rd-party apps
     'rest_framework',
