@@ -2,13 +2,17 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 import os
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class CustomUser(AbstractUser):
     # username = models.CharField(max_length=50, unique=True)
     # first_name = models.CharField(max_length=30)
     # last_name = models.CharField(max_length=30, blank=True)
-    age = models.IntegerField(default=0)
+    age = models.IntegerField(default=0, validators=[
+            MinValueValidator(1),
+            MaxValueValidator(150),
+        ])
     biography = models.TextField(blank=True)
 
     STAGE_OF_STUDY_CHOICES = [
@@ -24,7 +28,10 @@ class CustomUser(AbstractUser):
     stage_of_study = models.CharField(max_length=2, choices=STAGE_OF_STUDY_CHOICES, default='N')
     # сколько полных лет на текущей ступени обучения от 0 до ...
     # переименовать на course или типа того
-    course_of_study = models.IntegerField(default=0)
+    course_of_study = models.IntegerField(default=0, validators=[
+            MinValueValidator(1),
+            MaxValueValidator(20),
+        ])
     profile_image = models.ImageField(null=True, blank=True, upload_to=os.path.join(settings.BASE_DIR,
                                                                                     'data/user_profile_images'))
     contact_phone = models.CharField(max_length=20, blank=True)
