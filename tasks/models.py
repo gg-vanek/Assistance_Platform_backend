@@ -46,8 +46,9 @@ class Task(models.Model):
     RATING_CHOICES = [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)]
     time_rate = models.IntegerField(choices=RATING_CHOICES, blank=True, null=True)
     accuracy_rate = models.IntegerField(choices=RATING_CHOICES, blank=True, null=True)
-    created_at = models.TimeField(auto_now_add=True)
-    updated_at = models.TimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    stop_accepting_applications_at = models.DateTimeField(blank=False)
     expires_at = models.DateTimeField(blank=False)
 
     def __str__(self):
@@ -55,4 +56,3 @@ class Task(models.Model):
 
     def get_tags(self):
         return ", ".join([tag.tag_name for tag in self.tags.all()])
-

@@ -6,14 +6,15 @@ class TaskAdmin(admin.ModelAdmin):
     model = Task
     list_display = ('task_id', 'author', 'doer', 'title',
                     'difficulty_stage_of_study', 'difficulty_course_of_study',
-                    'get_tags', 'subject', 'description', 'status', 'created_at', 'updated_at', 'expires_at')
+                    'get_tags', 'subject', 'description', 'status',
+                    'created_at', 'stop_accepting_applications_at', 'expires_at')
 
     fieldsets = (
         ('Task short info', {'fields': ('title', )}),
         ('Author and Doer', {'fields': ('author', 'doer')}),
         ('Task info', {'fields': ('description', 'subject', 'tags', 'status')}),
         ('Difficulty', {'fields': ('difficulty_stage_of_study', 'difficulty_course_of_study')}),
-        ("Deadline", {"fields": ('expires_at',)})
+        ("Deadlines", {"fields": ('stop_accepting_applications_at', 'expires_at',)})
     )
 
 
