@@ -4,6 +4,14 @@ from django.conf import settings
 import os
 
 
+class TaskFile(models.Model):
+    filename = models.CharField(max_length=50, blank=False)
+    file = models.FileField(upload_to=os.path.join(settings.MEDIA_ROOT, f'tasks/task_files'))
+
+    def __str__(self):
+        return self.filename
+
+
 class TaskTag(models.Model):
     tag_name = models.CharField(max_length=50, blank=False)
 
@@ -39,7 +47,7 @@ class Task(models.Model):
     subject = models.ForeignKey(TaskSubject, on_delete=models.SET_NULL, null=True)
     description = models.TextField()
     ####
-    # extra_files = models.FilePathField(path=os.path.join(settings.BASE_DIR, f'/tasks_data/{task_id}'), blank=True)
+    files = models.ManyToManyField(TaskFile, blank=True)
     ####
     STATUS_CHOICES = [('A', 'accepting applications'), ('P', 'in progress'), ('C', 'completed')]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
@@ -56,3 +64,12 @@ class Task(models.Model):
 
     def get_tags(self):
         return ", ".join([tag.tag_name for tag in self.tags.all()])
+
+    def add_file(self, file):
+        pass
+
+    def delete_file(self):
+        pass
+
+    def set_doer(self):
+        pass

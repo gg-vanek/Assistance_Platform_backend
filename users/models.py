@@ -32,8 +32,8 @@ class CustomUser(AbstractUser):
             MinValueValidator(1),
             MaxValueValidator(20),
         ])
-    profile_image = models.ImageField(null=True, blank=True, upload_to=os.path.join(settings.BASE_DIR,
-                                                                                    'data/user_profile_images'))
+    profile_image = models.ImageField(null=True, blank=True, upload_to=os.path.join(settings.MEDIA_ROOT,
+                                                                                    'users/user_profile_images'))
     contact_phone = models.CharField(max_length=20, blank=True)
     contact_email = models.EmailField(blank=True)
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, TaskTag, TaskSubject
+from .models import Task, TaskTag, TaskSubject, TaskFile
 
 
 class TaskAdmin(admin.ModelAdmin):
@@ -14,7 +14,8 @@ class TaskAdmin(admin.ModelAdmin):
         ('Author and Doer', {'fields': ('author', 'doer')}),
         ('Task info', {'fields': ('description', 'subject', 'tags', 'status')}),
         ('Difficulty', {'fields': ('difficulty_stage_of_study', 'difficulty_course_of_study')}),
-        ("Deadlines", {"fields": ('stop_accepting_applications_at', 'expires_at',)})
+        ("Deadlines", {"fields": ('stop_accepting_applications_at', 'expires_at',)}),
+        ("Files", {"fields": ('files',)})
     )
 
 
@@ -28,7 +29,15 @@ class TaskSubjectAdmin(admin.ModelAdmin):
     list_display = ('subject_name', )
 
 
+class TaskFileAdmin(admin.ModelAdmin):
+    model = TaskFile
+    list_display = ('filename', 'file')
+
+    fields = [field.name for field in model._meta.fields if field.name != "id"]
+
+
 # Register your models here.
 admin.site.register(Task, TaskAdmin)
 admin.site.register(TaskTag, TaskTagAdmin)
 admin.site.register(TaskSubject, TaskSubjectAdmin)
+admin.site.register(TaskFile, TaskFileAdmin)
