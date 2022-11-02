@@ -22,7 +22,10 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # users app
     path('api/v1/users/', include('users.urls')),
+    # tasks app
+    path('api/v1/tasks/', include('tasks.urls')),
     path('api/v1/api-auth/', include('rest_framework.urls')),
     path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

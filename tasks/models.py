@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from users.models import CustomUser
 from django.conf import settings
@@ -57,7 +59,7 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     stop_accepting_applications_at = models.DateTimeField(blank=False)
-    expires_at = models.DateTimeField(blank=False)
+    expires_at = models.DateTimeField(default=datetime.datetime.now()+datetime.timedelta(days=7), blank=True)
 
     def __str__(self):
         return self.title
