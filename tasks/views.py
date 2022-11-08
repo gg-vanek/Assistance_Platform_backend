@@ -21,6 +21,7 @@ class TaskList(generics.ListAPIView):
         difficulty_stage_of_study = self.request.query_params.get('stage')
         difficulty_course_of_study = self.request.query_params.get('course')
         subject = self.request.query_params.get('subject')
+        sort = self.request.query_params.get('sort')
 
         if tags is not None:
             for tag in tags.split(','):
@@ -34,6 +35,8 @@ class TaskList(generics.ListAPIView):
         if subject is not None:
             queryset = queryset.filter(subject=subject)
 
+        if sort is not None:
+            queryset = queryset.order_by(sort)
         return queryset
 
 
