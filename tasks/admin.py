@@ -21,7 +21,7 @@ class TaskAdmin(admin.ModelAdmin):
 
 class TaskTagAdmin(admin.ModelAdmin):
     model = TaskTag
-    list_display = ('tag_name', )
+    list_display = ('tag_name', 'id')
 
 
 class TaskSubjectAdmin(admin.ModelAdmin):
