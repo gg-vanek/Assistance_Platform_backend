@@ -6,7 +6,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class CustomUser(AbstractUser):
-    user_id = models.IntegerField(primary_key=True, auto_created=True)
+    user_id = models.BigAutoField(primary_key=True)
 
     # username = models.CharField(max_length=50, unique=True)
     # first_name = models.CharField(max_length=30)

@@ -40,8 +40,15 @@ class TaskList(generics.ListAPIView):
         return queryset
 
 
-
 class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsTaskOwnerOrReadOnly,)
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+
+
+class CreateTask(generics.CreateAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = TaskSerializer
+    # но тут нельзя задавать "создателя задачи", "исполнителя", "статус"
+    # также по умолчанию следует установить некоторые поля вроде сложности задачи
+

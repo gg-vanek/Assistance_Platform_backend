@@ -5,6 +5,8 @@ from .models import Task
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('task_id',
+                  'author',
+                  'doer',
                   'title',
                   'difficulty_stage_of_study',
                   'difficulty_course_of_study',
@@ -16,3 +18,4 @@ class TaskSerializer(serializers.ModelSerializer):
                   'stop_accepting_applications_at',
                   'expires_at')
         model = Task
+
