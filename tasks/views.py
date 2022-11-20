@@ -1,14 +1,21 @@
+import datetime
+
 from rest_framework import generics, permissions
 from .models import Task
-from .serializers import TaskSerializer
+from .serializers import TaskDisplaySerializer, TaskUpdateSerializer, TaskCreateSerializer
 from rest_framework.response import Response
+
+from rest_framework import status
+from rest_framework.settings import api_settings
+
+import datetime
 
 from .permissions import IsTaskOwnerOrReadOnly
 
 
 class TaskList(generics.ListAPIView):
     permission_classes = (permissions.AllowAny,)
-    serializer_class = TaskSerializer
+    serializer_class = TaskDisplaySerializer
 
     def get_queryset(self):
         """
@@ -43,12 +50,44 @@ class TaskList(generics.ListAPIView):
 class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsTaskOwnerOrReadOnly,)
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+    serializer_class = TaskUpdateSerializer
+
+
+class UpdateTask(generics.UpdateAPIView):
+    # TODO
+    pass
 
 
 class CreateTask(generics.CreateAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = TaskSerializer
     # но тут нельзя задавать "создателя задачи", "исполнителя", "статус"
     # также по умолчанию следует установить некоторые поля вроде сложности задачи
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = TaskCreateSerializer
 
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        req_data = request.data.copy()
+        data = {'author': request.user,
+                'status': 'accepting applications',
+                'created_at': datetime.datetime.now(),
+                'updated_at': datetime.datetime.now(),
+                'expires_at': datetime.datetime.now() + datetime.timedelta(days=7)}
+
+        if req_data.get('stop_accepting_applications_at') == '' or 'stop_accepting_applications_at' not in req_data:
+            req_data['stop_accepting_applications_at'] = datetime.datetime.now() + datetime.timedelta(days=7)
+        if req_data.get('difficulty_stage_of_study') == 'N' or 'difficulty_stage_of_study' not in req_data:
+            req_data['difficulty_stage_of_study'] = request.user.stage_of_study
+        if req_data.get('difficulty_course_of_study') == '0' or 'difficulty_course_of_study' not in req_data:
+            req_data['difficulty_course_of_study'] = request.user.course_of_study
+
+        serializer = self.get_serializer(data=req_data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer, data)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer, data={}):
+        serializer.save(**data)

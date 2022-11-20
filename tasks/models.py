@@ -68,10 +68,13 @@ class Task(models.Model):
         return ", ".join([tag.tag_name for tag in self.tags.all()])
 
     def add_file(self, file):
+        # TODO
         pass
 
     def delete_file(self):
+        # TODO
         pass
 
     def set_doer(self):
+        # TODO
         pass
