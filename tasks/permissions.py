@@ -9,4 +9,4 @@ class IsTaskOwnerOrReadOnly(permissions.BasePermission):
             # SAFE_METHODS are available for everyone
             # superuser can do whatever he wants hehe
             return True
-        return False
+        return request.user == obj.author

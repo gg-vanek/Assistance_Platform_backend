@@ -1,5 +1,3 @@
-import datetime
-
 from rest_framework import generics, permissions
 from .models import Task
 from .serializers import TaskDisplaySerializer, TaskUpdateSerializer, TaskCreateSerializer
@@ -53,9 +51,9 @@ class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskUpdateSerializer
 
 
-class UpdateTask(generics.UpdateAPIView):
-    # TODO
-    pass
+class TaskDelete(generics.DestroyAPIView):
+    permission_classes = (IsTaskOwnerOrReadOnly,)
+    queryset = Task.objects.all()
 
 
 class CreateTask(generics.CreateAPIView):
