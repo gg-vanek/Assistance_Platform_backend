@@ -21,7 +21,7 @@ class TaskList(generics.ListAPIView):
         by filtering against a `username` query parameter in the URL.
         """
         queryset = Task.objects.all()
-        tags = self.request.query_params.get('tag')
+        tags = self.request.query_params.get('tags')
         status = self.request.query_params.get('status')
         difficulty_stage_of_study = self.request.query_params.get('stage')
         difficulty_course_of_study = self.request.query_params.get('course')
@@ -68,7 +68,7 @@ class CreateTask(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         req_data = request.data.copy()
         data = {'author': request.user,
-                'status': 'accepting applications',
+                'status': 'A',
                 'created_at': datetime.datetime.now(),
                 'updated_at': datetime.datetime.now(),
                 'expires_at': datetime.datetime.now() + datetime.timedelta(days=7)}
