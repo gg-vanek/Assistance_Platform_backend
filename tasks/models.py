@@ -59,12 +59,15 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     stop_accepting_applications_at = models.DateTimeField(blank=False)
-    expires_at = models.DateTimeField(default=datetime.datetime.now()+datetime.timedelta(days=7), blank=True)
+    expires_at = models.DateTimeField(default=datetime.datetime.now() + datetime.timedelta(days=7), blank=True)
 
     def __str__(self):
         return self.title
 
-    def get_tags(self):
+    def list_applicants(self):
+        return ", ".join([application.applicant.username for application in self.applications.all()])
+
+    def list_tags(self):
         return ", ".join([tag.tag_name for tag in self.tags.all()])
 
     def add_file(self, file):
@@ -78,3 +81,11 @@ class Task(models.Model):
     def set_doer(self):
         # TODO
         pass
+
+
+class Application(models.Model):
+    applicant = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='applications')
+    message = models.CharField(max_length=500, blank=True, null=True)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True, related_name='applications')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

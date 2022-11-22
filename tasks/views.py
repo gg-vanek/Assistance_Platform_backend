@@ -1,11 +1,11 @@
 from rest_framework import generics, permissions
 from .models import Task
-from .serializers import TaskDisplaySerializer, TaskUpdateSerializer, TaskCreateSerializer
+from .serializers import TaskDisplaySerializer, TaskUpdateSerializer, TaskCreateSerializer, TaskApplySerializer
 from rest_framework.response import Response
 
 from rest_framework import status
 from rest_framework.settings import api_settings
-
+from django.http import HttpResponse
 import datetime
 
 from .permissions import IsTaskOwnerOrReadOnly
@@ -46,6 +46,7 @@ class TaskList(generics.ListAPIView):
 
 
 class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
+    # TODO задавать поле updated at
     permission_classes = (IsTaskOwnerOrReadOnly,)
     queryset = Task.objects.all()
     serializer_class = TaskUpdateSerializer
@@ -89,3 +90,46 @@ class CreateTask(generics.CreateAPIView):
 
     def perform_create(self, serializer, data={}):
         serializer.save(**data)
+
+
+class TaskApply(generics.CreateAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = TaskApplySerializer
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        req_data = request.data.copy()
+        task = Task.objects.get(pk=kwargs['pk'])
+
+        data = {'applicant': request.user,
+                'task': task,
+                'created_at': datetime.datetime.now(),
+                'updated_at': datetime.datetime.now(), }
+
+        serializer = self.get_serializer(data=req_data)
+        serializer.is_valid(raise_exception=True)
+
+        if request.user == task.author:
+            # TODO нормально возвращать ошибку в виде json
+            html = "<html><body>Ошибка: Cоздатель задачи не может быть ее исполнителем</body></html>"
+            return HttpResponse(html)
+
+        if any([application.applicant == request.user for application in task.applications.all()]):
+            self.perform_update(serializer, data)
+            # если уже была такая заявка на это задание то ничего не меняем
+            pass
+        else:
+            # иначе добавляем эту заявку к списку
+            application = self.perform_create(serializer, data)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer, data={}):
+        return serializer.save(**data)
+
+    def perform_update(self, serializer, data={}):
+        # TODO можно реализовать редактирование заявки через добавление в нее поля, типа task_id при этом это поле не будет ForeignKey (или будет)
+        pass

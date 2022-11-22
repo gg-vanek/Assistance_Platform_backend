@@ -1,10 +1,19 @@
 from rest_framework import serializers
-from .models import Task
+
+from users.models import CustomUser
+from .models import Task, Application
+
+
+class TaskApplySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('message',)
+        model = Application
 
 
 class TaskDisplaySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('task_id',
+                  'list_applicants',
                   'author',
                   'doer',
                   'title',
