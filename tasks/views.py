@@ -5,10 +5,39 @@ from rest_framework.response import Response
 
 from rest_framework import status
 from rest_framework.settings import api_settings
+from django.core.exceptions import ObjectDoesNotExist
+
+from django.http import HttpResponseRedirect, HttpResponseNotFound, HttpResponse
 
 import datetime
 
 from .permissions import IsTaskOwnerOrReadOnly
+
+
+def ApplyForTask(request, pk):
+    try:
+        task = Task.objects.get(task_id=pk)
+
+        if request.user == task.author:
+            # вывести "создатель задачи не может быть ее исполнителем"
+            html = "<html><body>Ошибка: Cоздатель задачи не может быть ее исполнителем</body></html>"
+            return HttpResponse(html)
+        if task.applicants.filter(pk=request.user.pk).exists():
+            html = "<html><body>Ошибка: вы уже подали заявку на эту задачу</body></html>"
+            return HttpResponse(html)
+
+        task.applicants.add(request.user.pk)
+        task.save()
+        return HttpResponse("<html><body>ваша заявка отправлена</body></html>")
+
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("<h2>Task not found</h2>")
+
+
+
+class ChooseDoer():
+    # TODO: при запросе от владельца задачи задавать решателя задачи и менять статус задачи
+    pass
 
 
 class TaskList(generics.ListAPIView):

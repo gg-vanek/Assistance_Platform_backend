@@ -31,6 +31,7 @@ class TaskSubject(models.Model):
 class Task(models.Model):
     task_id = models.AutoField(primary_key=True)
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='author')
+    applicants = models.ManyToManyField(CustomUser, null=True, default=None, blank=True)
     doer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='doer')
     title = models.CharField(max_length=255)
 
@@ -64,7 +65,10 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
-    def get_tags(self):
+    def list_applicants(self):
+        return ", ".join([applicant.username for applicant in self.applicants.all()])
+
+    def list_tags(self):
         return ", ".join([tag.tag_name for tag in self.tags.all()])
 
     def add_file(self, file):
