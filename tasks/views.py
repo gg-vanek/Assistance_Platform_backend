@@ -1,5 +1,5 @@
 from rest_framework import generics, permissions
-from .models import Task
+from .models import Task, Application
 from .serializers import TaskDisplaySerializer, TaskUpdateSerializer, TaskCreateSerializer, TaskApplySerializer
 from rest_framework.response import Response
 
@@ -117,12 +117,12 @@ class TaskApply(generics.CreateAPIView):
             return HttpResponse(html)
 
         if any([application.applicant == request.user for application in task.applications.all()]):
-            self.perform_update(serializer, data)
             # если уже была такая заявка на это задание то ничего не меняем
-            pass
-        else:
-            # иначе добавляем эту заявку к списку
-            application = self.perform_create(serializer, data)
+            # TODO нормально возвращать ошибку в виде json
+            html = "<html><body>Ошибка: Ваша заявка уже принята, вы можете ее отредактировать</body></html>"
+            return HttpResponse(html)
+
+        self.perform_create(serializer, data)
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -130,6 +130,3 @@ class TaskApply(generics.CreateAPIView):
     def perform_create(self, serializer, data={}):
         return serializer.save(**data)
 
-    def perform_update(self, serializer, data={}):
-        # TODO можно реализовать редактирование заявки через добавление в нее поля, типа task_id при этом это поле не будет ForeignKey (или будет)
-        pass
