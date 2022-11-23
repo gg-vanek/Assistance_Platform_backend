@@ -16,30 +16,43 @@ class TaskList(generics.ListAPIView):
     serializer_class = TaskDisplaySerializer
 
     def get_queryset(self):
-        # TODO доделать нормальную фильтрацию
         """
         Optionally restricts the returned purchases to a given user,
         by filtering against a `username` query parameter in the URL.
         """
         queryset = Task.objects.all()
         tags = self.request.query_params.get('tags')
+        tags_grouping_type = self.request.query_params.get('tags_grouping_type', 'or')
+
         status = self.request.query_params.get('status')
         difficulty_stage_of_study = self.request.query_params.get('stage')
         difficulty_course_of_study = self.request.query_params.get('course')
-        subject = self.request.query_params.get('subject')
+        subjects = self.request.query_params.get('subjects')
         sort = self.request.query_params.get('sort')
 
         if tags is not None:
-            for tag in tags.split(','):
-                queryset = queryset.filter(tags=tag)
+            tags = tags.split(',')
+            if tags_grouping_type == 'or':
+                # выведи задания у которых есть tag1 or tag2 etc
+                queryset = queryset.filter(tags__in=tags)
+            elif tags_grouping_type == 'and':
+                # выведи задания у которых есть tag1 and tag2 etc
+                for tag in tags:
+                    queryset = queryset.filter(tags=tag)
+            else:
+                # TODO ошибка некорректный параметр группировки тэгов
+                pass
+
         if status is not None:
             queryset = queryset.filter(status=status)
         if difficulty_stage_of_study is not None:
             queryset = queryset.filter(difficulty_stage_of_study=difficulty_stage_of_study)
         if difficulty_course_of_study is not None:
             queryset = queryset.filter(difficulty_course_of_study=difficulty_course_of_study)
-        if subject is not None:
-            queryset = queryset.filter(subject=subject)
+        if subjects is not None:
+            # учитывая что у задания поле subject - единственное => выводим только через "or"
+            subjects = subjects.split(',')
+            queryset = queryset.filter(subject__in=subjects)
 
         if sort is not None:
             queryset = queryset.order_by(sort)
