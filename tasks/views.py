@@ -16,6 +16,7 @@ class TaskList(generics.ListAPIView):
     serializer_class = TaskDisplaySerializer
 
     def get_queryset(self):
+        # TODO доделать нормальную фильтрацию
         """
         Optionally restricts the returned purchases to a given user,
         by filtering against a `username` query parameter in the URL.
@@ -93,6 +94,7 @@ class CreateTask(generics.CreateAPIView):
 
 
 class TaskApply(generics.CreateAPIView):
+    # TODO переделать в CreateUpdateDestroyAPIView
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = TaskApplySerializer
 
