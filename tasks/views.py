@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions
+
 from .models import Task, Application
 from .serializers import TaskDisplaySerializer, TaskUpdateSerializer, TaskCreateSerializer, TaskApplySerializer
 from rest_framework.response import Response
@@ -7,7 +8,6 @@ from rest_framework import status
 from rest_framework.settings import api_settings
 from django.http import HttpResponse
 import datetime
-
 from .permissions import IsTaskOwnerOrReadOnly
 
 
@@ -32,6 +32,9 @@ class TaskList(generics.ListAPIView):
 
         if tags is not None:
             tags = tags.split(',')
+            # TODO возможно нужно переделать фильтрацию
+            # типа словарик kwargs['tags__in']=tags если параметр or
+            # и kwargs['четотам еще']=tags если параметр and
             if tags_grouping_type == 'or':
                 # выведи задания у которых есть tag1 or tag2 etc
                 queryset = queryset.filter(tags__in=tags)
@@ -60,7 +63,6 @@ class TaskList(generics.ListAPIView):
 
 
 class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
-    # TODO задавать поле updated at
     permission_classes = (IsTaskOwnerOrReadOnly,)
     queryset = Task.objects.all()
     serializer_class = TaskUpdateSerializer
@@ -127,15 +129,12 @@ class TaskApply(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         if request.user == task.author:
-            # TODO нормально возвращать ошибку в виде json
-            html = "<html><body>Ошибка: Cоздатель задачи не может быть ее исполнителем</body></html>"
-            return HttpResponse(html)
-
+            return Response({'detail': "Cоздатель задачи не может быть ее исполнителем"},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
         if any([application.applicant == request.user for application in task.applications.all()]):
             # если уже была такая заявка на это задание то ничего не меняем
-            # TODO нормально возвращать ошибку в виде json
-            html = "<html><body>Ошибка: Ваша заявка уже принята, вы можете ее отредактировать</body></html>"
-            return HttpResponse(html)
+            return Response({'detail': "Ваша заявка уже принята вы не можете добавить новую,"
+                                       " но можете отредактировать старую"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         self.perform_create(serializer, data)
 
@@ -144,4 +143,3 @@ class TaskApply(generics.CreateAPIView):
 
     def perform_create(self, serializer, data={}):
         return serializer.save(**data)
-

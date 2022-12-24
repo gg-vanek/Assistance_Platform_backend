@@ -32,9 +32,11 @@ class TaskDisplaySerializer(serializers.ModelSerializer):
 
 class TaskUpdateSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', read_only=True)
+    list_applicants = serializers.CharField(read_only=True)
 
     class Meta:
         fields = ('author',
+                  'list_applicants',
                   'title',
                   'difficulty_stage_of_study',
                   'difficulty_course_of_study',
