@@ -1,7 +1,7 @@
 import datetime
 
 from django.db import models
-from users.models import CustomUser
+from users.models import User
 from django.conf import settings
 import os
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -23,8 +23,8 @@ class TaskSubject(models.Model):
 
 class Task(models.Model):
     task_id = models.AutoField(primary_key=True)
-    author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='author')
-    doer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='doer')
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='author')
+    doer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='doer')
     title = models.CharField(max_length=255)
 
     STAGE_OF_STUDY_CHOICES = [
@@ -84,7 +84,7 @@ class Task(models.Model):
 
 
 class Application(models.Model):
-    applicant = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='applications')
+    applicant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='applications')
     message = models.CharField(max_length=500, blank=True, null=True)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True, related_name='applications')
     created_at = models.DateTimeField(auto_now_add=True)

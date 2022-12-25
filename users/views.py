@@ -1,17 +1,17 @@
 from rest_framework import generics, permissions
-from .models import CustomUser
-from .serializers import UserSerializer
+from .models import User
+from .serializers import UserSerializer, UserDetailSerializer
 
 from .permissions import IsAccountOwnerOrReadOnly
 
 
 class UserList(generics.ListAPIView):
     permission_classes = (permissions.AllowAny,)
-    queryset = CustomUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAccountOwnerOrReadOnly,)
-    queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    serializer_class = UserDetailSerializer

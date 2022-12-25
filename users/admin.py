@@ -2,19 +2,19 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
-from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser
+from .forms import UserCreationForm, UserChangeForm
+from .models import User
 
 
 class CustomUserAdmin(UserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
-    model = CustomUser
-    list_display = ('user_id', 'username', 'email', 'first_name', 'last_name', 'age', 'stage_of_study', 'course_of_study')
+    add_form = UserCreationForm
+    form = UserChangeForm
+    model = User
+    list_display = ('id', 'username', 'email', 'first_name', 'last_name', 'stage_of_study', 'course_of_study')
 
     fieldsets = (
         ('Account info', {'fields': ('username', 'email', 'password')}),
-        ('Person\'s info', {'fields': ('first_name', 'last_name', 'age')}),
+        ('Person\'s info', {'fields': ('first_name', 'last_name')}),
         ('Education', {'fields': ('stage_of_study', 'course_of_study')}),
         ('Profile info', {'fields': ('profile_image', 'biography')}),
         ('Contact info', {'fields': ('contact_phone', 'contact_email')}),
@@ -30,4 +30,4 @@ class CustomUserAdmin(UserAdmin):
     )
 
 
-admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(User, CustomUserAdmin)
