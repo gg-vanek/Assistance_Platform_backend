@@ -12,19 +12,17 @@ from .permissions import IsTaskOwnerOrReadOnly
 
 
 class TaskList(generics.ListAPIView):
+    # permission_classes = (permissions.IsAuthenticated,)
     permission_classes = (permissions.AllowAny,)
     serializer_class = TaskDisplaySerializer
 
+    # эта функция пусть будет здесь. это фильтрация queryset'а
     def get_queryset(self):
-        """
-        Optionally restricts the returned purchases to a given user,
-        by filtering against a `username` query parameter in the URL.
-        """
         queryset = Task.objects.all()
         tags = self.request.query_params.get('tags')
         tags_grouping_type = self.request.query_params.get('tags_grouping_type', 'or')
 
-        status = self.request.query_params.get('status')
+        task_status = self.request.query_params.get('task_status')
         difficulty_stage_of_study = self.request.query_params.get('stage')
         difficulty_course_of_study = self.request.query_params.get('course')
         subjects = self.request.query_params.get('subjects')
@@ -32,9 +30,6 @@ class TaskList(generics.ListAPIView):
 
         if tags is not None:
             tags = tags.split(',')
-            # TODO возможно нужно переделать фильтрацию
-            # типа словарик kwargs['tags__in']=tags если параметр or
-            # и kwargs['четотам еще']=tags если параметр and
             if tags_grouping_type == 'or':
                 # выведи задания у которых есть tag1 or tag2 etc
                 queryset = queryset.filter(tags__in=tags)
@@ -43,11 +38,12 @@ class TaskList(generics.ListAPIView):
                 for tag in tags:
                     queryset = queryset.filter(tags=tag)
             else:
-                # TODO ошибка некорректный параметр группировки тэгов
-                pass
+                return Response({'detail': f"URL parameter tags_grouping_type is '{tags_grouping_type}'"
+                                           f" but allowed values are 'and' and 'or'"},
+                                status=status.HTTP_400_BAD_REQUEST)
 
-        if status is not None:
-            queryset = queryset.filter(status=status)
+        if task_status is not None:
+            queryset = queryset.filter(status=task_status)
         if difficulty_stage_of_study is not None:
             queryset = queryset.filter(difficulty_stage_of_study=difficulty_stage_of_study)
         if difficulty_course_of_study is not None:
@@ -74,8 +70,6 @@ class TaskDelete(generics.DestroyAPIView):
 
 
 class CreateTask(generics.CreateAPIView):
-    # но тут нельзя задавать "создателя задачи", "исполнителя", "статус"
-    # также по умолчанию следует установить некоторые поля вроде сложности задачи
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = TaskCreateSerializer
 

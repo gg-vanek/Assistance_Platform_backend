@@ -57,3 +57,24 @@ class TaskCreateSerializer(serializers.ModelSerializer):
                   'description',
                   'stop_accepting_applications_at')
         model = Task
+
+
+# функции от модели такс, которые нужно вынести сюда
+def add_file(self, file):
+    # TODO
+    pass
+
+
+def delete_file(self):
+    # TODO
+    pass
+
+
+def set_doer(self):
+    # TODO
+    pass
+
+
+def check_if_expired(self):
+    # TODO
+    pass

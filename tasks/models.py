@@ -60,27 +60,13 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
-    def list_applicants(self):
+    def admin_list_applicants(self):
+        # только для использоавния в админке
         return ", ".join([application.applicant.username for application in self.applications.all()])
 
-    def list_tags(self):
+    def admin_list_tags(self):
+        # только для использоавния в админке
         return ", ".join([tag.tag_name for tag in self.tags.all()])
-
-    def add_file(self, file):
-        # TODO
-        pass
-
-    def delete_file(self):
-        # TODO
-        pass
-
-    def set_doer(self):
-        # TODO
-        pass
-
-    def check_if_expired(self):
-        # TODO
-        pass
 
 
 class Application(models.Model):

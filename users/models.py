@@ -20,10 +20,8 @@ class User(AbstractUser):
     profile_image = models.ImageField(null=True, blank=True,
                                       upload_to=os.path.join(settings.MEDIA_ROOT,
                                                              f'users/user_profile_images'))
-    # текущая ступень обучения
+
     stage_of_study = models.CharField(max_length=2, choices=STAGE_OF_STUDY_CHOICES, default='N')
-    # сколько полных лет на текущей ступени обучения от 0 до ...
-    # переименовать на course или типа того
     course_of_study = models.IntegerField(default=0, validators=[
         MinValueValidator(1),
         MaxValueValidator(15),

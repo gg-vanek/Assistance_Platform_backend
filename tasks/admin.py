@@ -4,9 +4,9 @@ from .models import Task, TaskTag, TaskSubject, TaskFile, Application
 
 class TaskAdmin(admin.ModelAdmin):
     model = Task
-    list_display = ('task_id', 'author', 'doer', 'list_applicants', 'title',
+    list_display = ('task_id', 'author', 'doer', 'admin_list_applicants', 'title',
                     'difficulty_stage_of_study', 'difficulty_course_of_study',
-                    'list_tags', 'subject', 'description', 'status',
+                    'admin_list_tags', 'subject', 'description', 'status',
                     'created_at', 'stop_accepting_applications_at', 'expires_at')
 
     fieldsets = (
