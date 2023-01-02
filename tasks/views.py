@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 
 from .models import Task, Application
-from .serializers import TaskDisplaySerializer, TaskUpdateSerializer, TaskCreateSerializer, TaskApplySerializer
+from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer
 from rest_framework.response import Response
 
 from rest_framework import status
@@ -14,7 +14,7 @@ from .permissions import IsTaskOwnerOrReadOnly
 class TaskList(generics.ListAPIView):
     # permission_classes = (permissions.IsAuthenticated,)
     permission_classes = (permissions.AllowAny,)
-    serializer_class = TaskDisplaySerializer
+    serializer_class = TaskSerializer
 
     # эта функция пусть будет здесь. это фильтрация queryset'а
     def get_queryset(self):
@@ -61,7 +61,7 @@ class TaskList(generics.ListAPIView):
 class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsTaskOwnerOrReadOnly,)
     queryset = Task.objects.all()
-    serializer_class = TaskUpdateSerializer
+    serializer_class = TaskDetailSerializer
 
 
 class TaskDelete(generics.DestroyAPIView):

@@ -22,7 +22,6 @@ class TaskSubject(models.Model):
 
 
 class Task(models.Model):
-    task_id = models.AutoField(primary_key=True)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='author')
     doer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='doer')
     title = models.CharField(max_length=255)

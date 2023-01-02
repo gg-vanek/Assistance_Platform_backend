@@ -10,10 +10,12 @@ class TaskApplySerializer(serializers.ModelSerializer):
         model = Application
 
 
-class TaskDisplaySerializer(serializers.ModelSerializer):
+class TaskSerializer(serializers.ModelSerializer):
+    applicants = serializers.SerializerMethodField()
+
     class Meta:
-        fields = ('task_id',
-                  'list_applicants',
+        fields = ('id',
+                  'applicants',
                   'author',
                   'doer',
                   'title',
@@ -29,14 +31,19 @@ class TaskDisplaySerializer(serializers.ModelSerializer):
                   'expires_at')
         model = Task
 
+    def get_applicants(self, task):
+        applicantions = task.applications.all()
+        applicants = [application.applicant.username for application in applicantions]
+        return applicants
 
-class TaskUpdateSerializer(serializers.ModelSerializer):
+
+class TaskDetailSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', read_only=True)
-    list_applicants = serializers.CharField(read_only=True)
+    applicants = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('author',
-                  'list_applicants',
+                  'applicants',
                   'title',
                   'difficulty_stage_of_study',
                   'difficulty_course_of_study',
@@ -45,6 +52,11 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
                   'description',
                   'stop_accepting_applications_at')
         model = Task
+
+    def get_applicants(self, task):
+        applicantions = task.applications.all()
+        applicants = [application.applicant.username for application in applicantions]
+        return applicants
 
 
 class TaskCreateSerializer(serializers.ModelSerializer):
