@@ -3,7 +3,7 @@ from rest_framework import generics, permissions
 
 from .models import Task, Application, TaskTag, TaskSubject
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
-    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer
+    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
@@ -252,3 +252,16 @@ class SubjectsInfo(generics.ListAPIView):
     serializer_class = SubjectInfoSerializer
     queryset = TaskSubject.objects.all()
 
+
+class MyApplicationsList(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = ApplicationSerializer
+
+    def get_queryset(self):
+        queryset = Application.objects.filter(applicant=self.request.user)
+        application_status = self.request.query_params.get('application_status', None)
+        if application_status is not None:
+            application_status = application_status.split(',')
+            queryset = queryset.filter(status__in=application_status)
+
+        return queryset

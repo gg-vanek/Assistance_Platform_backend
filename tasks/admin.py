@@ -38,7 +38,7 @@ class TaskFileAdmin(admin.ModelAdmin):
 
 class ApplicationAdmin(admin.ModelAdmin):
     model = Application
-    list_display = ('applicant', 'message', 'created_at', 'updated_at',)
+    list_display = ('applicant', 'task', 'status', 'message', 'created_at', 'updated_at',)
 
     # fields = [field.name for field in model._meta.fields if field.name != "id"]
     exclude = ('id',)

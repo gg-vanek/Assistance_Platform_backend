@@ -72,6 +72,7 @@ class Application(models.Model):
     applicant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='applications')
     message = models.CharField(max_length=500, blank=True, null=True)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True, related_name='applications')
+    status = models.CharField(default='S', max_length=1, choices=[('A', 'accepted'), ('R', 'rejected'), ('S', 'sent')])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -104,3 +104,14 @@ class SubjectInfoSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name',)
         model = TaskSubject
+
+
+class ApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('id',
+                  'message',
+                  'task',
+                  'status',
+                  'created_at',
+                  'updated_at',)
+        model = Application
