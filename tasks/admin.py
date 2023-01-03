@@ -20,12 +20,12 @@ class TaskAdmin(admin.ModelAdmin):
 
 class TaskTagAdmin(admin.ModelAdmin):
     model = TaskTag
-    list_display = ('tag_name', 'id',)
+    list_display = ('id', 'name',)
 
 
 class TaskSubjectAdmin(admin.ModelAdmin):
     model = TaskSubject
-    list_display = ('subject_name',)
+    list_display = ('id', 'name',)
 
 
 class TaskFileAdmin(admin.ModelAdmin):

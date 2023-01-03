@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from users.models import User
-from .models import Task, Application
+from .models import Task, Application, TaskTag, TaskSubject
 
 
 class TaskApplySerializer(serializers.ModelSerializer):
@@ -94,22 +94,13 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         model = Task
 
 
-# функции от модели такс, которые нужно вынести сюда
-def add_file(self, file):
-    # TODO
-    pass
+class TagInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('id', 'name',)
+        model = TaskTag
 
 
-def delete_file(self):
-    # TODO
-    pass
-
-
-def set_doer(self):
-    # TODO
-    pass
-
-
-def check_if_expired(self):
-    # TODO
-    pass
+class SubjectInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('id', 'name',)
+        model = TaskSubject

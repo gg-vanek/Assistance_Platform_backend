@@ -1,7 +1,8 @@
 from rest_framework import generics, permissions
 
-from .models import Task, Application
-from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, ApplicationDetailSerializer
+from .models import Task, Application, TaskTag, TaskSubject
+from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
+    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
@@ -148,3 +149,15 @@ class ApplicationDetail(generics.RetrieveUpdateDestroyAPIView):
         queryset = Application.objects.all()
         queryset = queryset.filter(applicant=self.request.user)
         return queryset
+
+
+class TagsInfo(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = TagInfoSerializer
+    queryset = TaskTag.objects.all()
+
+
+class SubjectsInfo(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = SubjectInfoSerializer
+    queryset = TaskSubject.objects.all()

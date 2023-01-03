@@ -8,17 +8,17 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class TaskTag(models.Model):
-    tag_name = models.CharField(max_length=50, blank=False)
+    name = models.CharField(max_length=50, blank=False)
 
     def __str__(self):
-        return self.tag_name
+        return self.name
 
 
 class TaskSubject(models.Model):
-    subject_name = models.CharField(max_length=50, blank=False)
+    name = models.CharField(max_length=50, blank=False)
 
     def __str__(self):
-        return self.subject_name
+        return self.name
 
 
 class Task(models.Model):
@@ -65,7 +65,7 @@ class Task(models.Model):
 
     def admin_list_tags(self):
         # только для использоавния в админке
-        return ", ".join([tag.tag_name for tag in self.tags.all()])
+        return ", ".join([tag.name for tag in self.tags.all()])
 
 
 class Application(models.Model):
