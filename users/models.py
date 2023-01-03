@@ -7,7 +7,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 class User(AbstractUser):
     # TODO добавить уникальность эмейла при сохранении
-    # добавить проверку на неравенство username 'my_info', 'registration'
+    # добавить проверку на неравенство username 'my_profile', 'registration'
     biography = models.TextField(blank=True)
 
     STAGE_OF_STUDY_CHOICES = [

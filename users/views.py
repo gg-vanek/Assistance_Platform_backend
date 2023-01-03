@@ -18,6 +18,15 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserDetailSerializer
 
 
+class CurrentUserDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = UserDetailSerializer
+
+    def get_object(self):
+        queryset = self.request.user
+        return queryset
+
+
 class UserRegistration(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = UserRegistrationSerializer
