@@ -63,6 +63,12 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
     return queryset
 
 
+def search_in_tasks(queryset, search_query):
+    if search_query is not None:
+        queryset = queryset.filter(title__contains=search_query)
+    return queryset
+
+
 class TaskList(generics.ListAPIView):
     # permission_classes = (permissions.IsAuthenticated,)
     permission_classes = (permissions.AllowAny,)
@@ -85,6 +91,10 @@ class TaskList(generics.ListAPIView):
                         'date_end': self.request.query_params.get('date_end', None),
                         'date_type': self.request.query_params.get('date_type', 'created_at')}
         queryset = filter_tasks_by_date(queryset, **date_filters)
+
+        # поисковой запрос по заголовкам
+        search_query = self.request.query_params.get('search_query', None)
+        queryset = search_in_tasks(queryset, search_query)
 
         sort = self.request.query_params.get('sort')
 
@@ -128,6 +138,10 @@ class MyTasksList(generics.ListAPIView):
                           'difficulty_course_of_study': self.request.query_params.get('course', None),
                           'subjects': self.request.query_params.get('subjects', None)}
         queryset = filter_tasks_by_fields(queryset, **fields_filters)
+
+        # поисковой запрос по заголовкам
+        search_query = self.request.query_params.get('search_query', None)
+        queryset = search_in_tasks(queryset, search_query)
 
         sort = self.request.query_params.get('sort')
         if sort is not None:
@@ -237,3 +251,4 @@ class SubjectsInfo(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = SubjectInfoSerializer
     queryset = TaskSubject.objects.all()
+
