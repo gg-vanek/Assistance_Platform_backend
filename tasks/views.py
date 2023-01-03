@@ -156,11 +156,6 @@ class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskDetailSerializer
 
 
-class TaskDelete(generics.DestroyAPIView):
-    permission_classes = (IsTaskOwnerOrReadOnly,)
-    queryset = Task.objects.all()
-
-
 class CreateTask(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = TaskCreateSerializer
