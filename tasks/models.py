@@ -44,14 +44,14 @@ class Task(models.Model):
     subject = models.ForeignKey(TaskSubject, on_delete=models.SET_NULL, null=True)
     description = models.TextField()
 
-    STATUS_CHOICES = [('A', 'accepting applications'), ('P', 'in progress'), ('C', 'completed')]
+    STATUS_CHOICES = [('A', 'accepting applications'), ('P', 'in progress'), ('C', 'closed')]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    stop_accepting_applications_at = models.DateTimeField(blank=False)
-    expires_at = models.DateTimeField(default=datetime.datetime.now() + datetime.timedelta(days=7), blank=True)
-
+    stop_accepting_applications_at = models.DateTimeField()
+    expires_at = models.DateTimeField(default=datetime.datetime.now() + datetime.timedelta(days=7))
+    closed_at = models.DateTimeField(default=None, null=True)
     RATING_CHOICES = [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)]
     time_rate = models.IntegerField(choices=RATING_CHOICES, blank=True, null=True)
     accuracy_rate = models.IntegerField(choices=RATING_CHOICES, blank=True, null=True)
