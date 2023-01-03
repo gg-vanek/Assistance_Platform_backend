@@ -26,3 +26,17 @@ class UserDetailSerializer(serializers.ModelSerializer):
                   'contact_phone',
                   'contact_email',)
         model = User
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(min_length=6, max_length=128, write_only=True)
+
+    class Meta:
+        fields = ('username',
+                  'password',
+                  'email',)
+        model = User
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
+
