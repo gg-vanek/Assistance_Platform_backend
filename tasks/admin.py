@@ -14,7 +14,7 @@ class TaskAdmin(admin.ModelAdmin):
         ('Author and Doer', {'fields': ('author', 'doer',)}),
         ('Task info', {'fields': ('description', 'subject', 'tags', 'status',)}),
         ('Difficulty', {'fields': ('difficulty_stage_of_study', 'difficulty_course_of_study',)}),
-        ("Deadlines", {"fields": ('stop_accepting_applications_at', 'expires_at',)})
+        ("Dates", {"fields": ('stop_accepting_applications_at', 'expires_at',)})
     )
 
 
