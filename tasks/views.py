@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import generics, permissions
 
 from .models import Task, Application, TaskTag, TaskSubject
@@ -12,50 +13,126 @@ import datetime
 from .permissions import IsTaskOwnerOrReadOnly
 
 
+def filter_tasks_by_date(queryset, date_start, date_end, date_type):
+    date_filtering_dict = {}
+    if date_start is not None:
+        date_filtering_dict[date_type + '__gte'] = date_start
+    if date_end is not None:
+        date_filtering_dict[date_type + '__lte'] = date_end
+
+    if date_filtering_dict:
+        # TODO добавить защиту от дурака, который передаст кривую дату
+        queryset = queryset.filter(**date_filtering_dict)
+
+    return queryset
+
+
+def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, difficulty_stage_of_study,
+                           difficulty_course_of_study, subjects):
+    if tags is not None:
+        tags = tags.split(',')
+        if tags_grouping_type == 'or':
+            # выведи задания у которых есть tag1 or tag2 etc
+            queryset = queryset.filter(tags__in=tags)
+        elif tags_grouping_type == 'and':
+            # выведи задания у которых есть tag1 and tag2 etc
+            for tag in tags:
+                queryset = queryset.filter(tags=tag)
+        else:
+            return Response({'detail': f"URL parameter tags_grouping_type is '{tags_grouping_type}'"
+                                       f" but allowed values are 'and' and 'or'"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    if task_status is not None:
+        task_status = task_status.split(',')
+        queryset = queryset.filter(status__in=task_status)
+        # TODO добавить защиту от дурака, который передаст кривые статусы
+        # return Response({'detail': f"URL parameter task_status is '{task_status}'"
+        #                            f" but allowed values are 'A', 'P' and 'C'"},
+        #                 status=status.HTTP_400_BAD_REQUEST)
+
+    if difficulty_stage_of_study is not None:
+        queryset = queryset.filter(difficulty_stage_of_study=difficulty_stage_of_study)
+    if difficulty_course_of_study is not None:
+        queryset = queryset.filter(difficulty_course_of_study=difficulty_course_of_study)
+    if subjects is not None:
+        # учитывая что у задания поле subject - единственное => выводим только через "or"
+        subjects = subjects.split(',')
+        queryset = queryset.filter(subject__in=subjects)
+
+    return queryset
+
+
 class TaskList(generics.ListAPIView):
     # permission_classes = (permissions.IsAuthenticated,)
     permission_classes = (permissions.AllowAny,)
     serializer_class = TaskSerializer
 
-    # эта функция пусть будет здесь. это фильтрация queryset'а
     def get_queryset(self):
         queryset = Task.objects.all()
-        tags = self.request.query_params.get('tags')
-        tags_grouping_type = self.request.query_params.get('tags_grouping_type', 'or')
 
-        task_status = self.request.query_params.get('task_status')
-        difficulty_stage_of_study = self.request.query_params.get('stage')
-        difficulty_course_of_study = self.request.query_params.get('course')
-        subjects = self.request.query_params.get('subjects')
+        # фильтрация по полям
+        fields_filters = {'tags': self.request.query_params.get('tags', None),
+                          'tags_grouping_type': self.request.query_params.get('tags_grouping_type', 'or'),
+                          'task_status': self.request.query_params.get('task_status', None),
+                          'difficulty_stage_of_study': self.request.query_params.get('stage', None),
+                          'difficulty_course_of_study': self.request.query_params.get('course', None),
+                          'subjects': self.request.query_params.get('subjects', None)}
+        queryset = filter_tasks_by_fields(queryset, **fields_filters)
+
+        # фильтрация по времени
+        date_filters = {'date_start': self.request.query_params.get('date_start', None),
+                        'date_end': self.request.query_params.get('date_end', None),
+                        'date_type': self.request.query_params.get('date_type', 'created_at')}
+        queryset = filter_tasks_by_date(queryset, **date_filters)
+
         sort = self.request.query_params.get('sort')
-
-        if tags is not None:
-            tags = tags.split(',')
-            if tags_grouping_type == 'or':
-                # выведи задания у которых есть tag1 or tag2 etc
-                queryset = queryset.filter(tags__in=tags)
-            elif tags_grouping_type == 'and':
-                # выведи задания у которых есть tag1 and tag2 etc
-                for tag in tags:
-                    queryset = queryset.filter(tags=tag)
-            else:
-                return Response({'detail': f"URL parameter tags_grouping_type is '{tags_grouping_type}'"
-                                           f" but allowed values are 'and' and 'or'"},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-        if task_status is not None:
-            queryset = queryset.filter(status=task_status)
-        if difficulty_stage_of_study is not None:
-            queryset = queryset.filter(difficulty_stage_of_study=difficulty_stage_of_study)
-        if difficulty_course_of_study is not None:
-            queryset = queryset.filter(difficulty_course_of_study=difficulty_course_of_study)
-        if subjects is not None:
-            # учитывая что у задания поле subject - единственное => выводим только через "or"
-            subjects = subjects.split(',')
-            queryset = queryset.filter(subject__in=subjects)
 
         if sort is not None:
             queryset = queryset.order_by(sort)
+        return queryset
+
+
+class MyTasksList(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        queryset = Task.objects.all()
+
+        # я/не я (я исполнитель)/оба варианта
+        task_author = self.request.query_params.get('task_author', 'both')
+
+        if task_author == 'me':
+            queryset = queryset.filter(author=self.request.user)
+        elif task_author == 'notme':
+            queryset = queryset.filter(doer=self.request.user)
+        elif task_author == 'both':
+            queryset = queryset.filter(Q(doer=self.request.user) | Q(author=self.request.user))
+        else:
+            return Response({'detail': f"URL parameter task_author is '{task_author}'"
+                                       f" but allowed values are 'both', 'me' and 'notme'"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # фильтрация по времени
+        date_filters = {'date_start': self.request.query_params.get('date_start', None),
+                        'date_end': self.request.query_params.get('date_end', None),
+                        'date_type': self.request.query_params.get('date_type', 'created_at')}
+        queryset = filter_tasks_by_date(queryset, **date_filters)
+
+        # фильтрация по различным полям у заданий
+        fields_filters = {'tags': self.request.query_params.get('tags', None),
+                          'tags_grouping_type': self.request.query_params.get('tags_grouping_type', 'or'),
+                          'task_status': self.request.query_params.get('task_status', None),
+                          'difficulty_stage_of_study': self.request.query_params.get('stage', None),
+                          'difficulty_course_of_study': self.request.query_params.get('course', None),
+                          'subjects': self.request.query_params.get('subjects', None)}
+        queryset = filter_tasks_by_fields(queryset, **fields_filters)
+
+        sort = self.request.query_params.get('sort')
+        if sort is not None:
+            queryset = queryset.order_by(sort)
+
         return queryset
 
 
@@ -104,7 +181,6 @@ class CreateTask(generics.CreateAPIView):
 
 
 class TaskApply(generics.CreateAPIView):
-    # TODO переделать в CreateUpdateDestroyAPIView
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = TaskApplySerializer
 
