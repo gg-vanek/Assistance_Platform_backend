@@ -75,6 +75,9 @@ class Application(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return str(self.applicant) + '. task ' + str(self.task.id) + '. application ' + str(self.id)
+
 
 class TaskFile(models.Model):
     filename = models.CharField(max_length=50, blank=False)

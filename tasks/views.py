@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 
 from .models import Task, Application
-from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer
+from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, ApplicationDetailSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
@@ -137,3 +137,14 @@ class TaskApply(generics.CreateAPIView):
 
     def perform_create(self, serializer, data={}):
         return serializer.save(**data)
+
+
+class ApplicationDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = ApplicationDetailSerializer
+
+    def get_queryset(self):
+        # TODO добавить проверку на наличие заявки от юзера
+        queryset = Application.objects.all()
+        queryset = queryset.filter(applicant=self.request.user)
+        return queryset
