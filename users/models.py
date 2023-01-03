@@ -22,7 +22,7 @@ class User(AbstractUser):
                                                              f'users/user_profile_images'))
 
     stage_of_study = models.CharField(max_length=2, choices=STAGE_OF_STUDY_CHOICES, default='N')
-    course_of_study = models.IntegerField(default=0, validators=[
+    course_of_study = models.IntegerField(default=1, validators=[
         MinValueValidator(1),
         MaxValueValidator(15),
     ])
