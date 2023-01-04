@@ -4,23 +4,20 @@ from users.models import User
 from .models import Task, Application, TaskTag, TaskSubject
 
 
-class TaskApplySerializer(serializers.ModelSerializer):
+# informational serializers
+class TagInfoSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('message',)
-        model = Application
+        fields = ('id', 'name',)
+        model = TaskTag
 
 
-class ApplicationDetailSerializer(serializers.ModelSerializer):
-    applicant = serializers.CharField(source='applicant.username', read_only=True)
-    task = serializers.CharField(source='task.id', read_only=True)
-    created_at = serializers.CharField(read_only=True)
-    updated_at = serializers.CharField(read_only=True)
-
+class SubjectInfoSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('id', 'applicant', 'task', 'message', 'created_at', 'updated_at',)
-        model = Application
+        fields = ('id', 'name',)
+        model = TaskSubject
 
 
+# display/edit serializers
 class TaskSerializer(serializers.ModelSerializer):
     applicants = serializers.SerializerMethodField(read_only=True)
 
@@ -82,30 +79,6 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         return applicants
 
 
-class TaskCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = ('title',
-                  'difficulty_stage_of_study',
-                  'difficulty_course_of_study',
-                  'tags',
-                  'subject',
-                  'description',
-                  'stop_accepting_applications_at')
-        model = Task
-
-
-class TagInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = ('id', 'name',)
-        model = TaskTag
-
-
-class SubjectInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = ('id', 'name',)
-        model = TaskSubject
-
-
 class ApplicationSerializer(serializers.ModelSerializer):
     applicant_username = serializers.SerializerMethodField(read_only=True)
 
@@ -122,6 +95,36 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     def get_applicant_username(self, application):
         return application.applicant.username
+
+
+class ApplicationDetailSerializer(serializers.ModelSerializer):
+    applicant = serializers.CharField(source='applicant.username', read_only=True)
+    task = serializers.CharField(source='task.id', read_only=True)
+    created_at = serializers.CharField(read_only=True)
+    updated_at = serializers.CharField(read_only=True)
+
+    class Meta:
+        fields = ('id', 'applicant', 'task', 'message', 'created_at', 'updated_at',)
+        model = Application
+
+
+# task interact serializers
+class TaskApplySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('message',)
+        model = Application
+
+
+class TaskCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('title',
+                  'difficulty_stage_of_study',
+                  'difficulty_course_of_study',
+                  'tags',
+                  'subject',
+                  'description',
+                  'stop_accepting_applications_at')
+        model = Task
 
 
 class SetTaskDoerSerializer(serializers.ModelSerializer):

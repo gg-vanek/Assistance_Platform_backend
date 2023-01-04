@@ -4,20 +4,20 @@ from django.conf import settings
 import os
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+STAGE_OF_STUDY_CHOICES = [
+    ('N', 'None'),
+    ('S', 'School'),
+    ('C', 'College'),
+    ('B', "bachelor's degree"),
+    ('M', "master's degree"),
+    ('PG', "postgraduate study"),
+]
+
 
 class User(AbstractUser):
     # TODO добавить уникальность эмейла при сохранении
     # добавить проверку на неравенство username 'my_profile', 'registration'
     biography = models.TextField(blank=True)
-
-    STAGE_OF_STUDY_CHOICES = [
-        ('N', 'None'),
-        ('S', 'School'),
-        ('C', 'College'),
-        ('B', "bachelor's degree"),
-        ('M', "master's degree"),
-        ('PG', "postgraduate study"),
-    ]
 
     profile_image = models.ImageField(null=True, blank=True,
                                       upload_to=os.path.join(settings.MEDIA_ROOT,

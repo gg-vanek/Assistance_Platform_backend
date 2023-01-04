@@ -1,5 +1,6 @@
 from django.db.models import Q
 from rest_framework import generics, permissions
+from rest_framework.decorators import api_view, permission_classes
 
 from .models import Task, Application, TaskTag, TaskSubject
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
@@ -11,6 +12,8 @@ from rest_framework.settings import api_settings
 from django.http import HttpResponse
 import datetime
 from .permissions import IsTaskOwnerOrReadOnly
+
+from users.models import STAGE_OF_STUDY_CHOICES
 
 
 def filter_tasks_by_date(queryset, date_start, date_end, date_type):
@@ -71,20 +74,34 @@ def search_in_tasks(queryset, search_query):
 
 # информационные эндпоинты
 class TagsInfo(generics.ListAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
     serializer_class = TagInfoSerializer
     queryset = TaskTag.objects.all()
 
 
 class SubjectsInfo(generics.ListAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
     serializer_class = SubjectInfoSerializer
     queryset = TaskSubject.objects.all()
 
 
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def informational_endpoint_view(request):
+    information_dictionary = {'tags_info': [TagInfoSerializer(tag).data for tag in TaskTag.objects.all()],
+                              'subjects_info': [SubjectInfoSerializer(subject).data for subject in
+                                                TaskSubject.objects.all()],
+                              'filters_info': {'fields_filters': '...',
+                                               'search_filter': '...',
+                                               'date_filters': '...',
+                                               'author_filters': '...'},
+                              'profile_choices_info': {'stage_of_study_choices': STAGE_OF_STUDY_CHOICES}}
+
+    return Response(information_dictionary)
+
+
 # эндпоинты для работы с заданиями
 class TaskList(generics.ListAPIView):
-    # permission_classes = (permissions.IsAuthenticated,)
     permission_classes = (permissions.AllowAny,)
     serializer_class = TaskSerializer
 
@@ -269,6 +286,6 @@ class TaskApply(generics.CreateAPIView):
 class SetTaskDoer(generics.RetrieveUpdateAPIView):
     # при GET запросе возвращается список заявок
     # при пост запросе необходимо в теле запроса передать doer=userID и он установится как исполнитель
-    permission_classes = (IsTaskOwnerOrReadOnly, )
+    permission_classes = (permissions.IsAuthenticated, IsTaskOwnerOrReadOnly,)
     serializer_class = SetTaskDoerSerializer
     queryset = Task.objects.all()
