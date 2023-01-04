@@ -22,7 +22,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    applicants = serializers.SerializerMethodField()
+    applicants = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         fields = ('id',
@@ -43,15 +43,15 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
 
     def get_applicants(self, task):
-        applicantions = task.applications.all()
-        applicants = [application.applicant.username for application in applicantions]
+        applications = task.applications.all()
+        applicants = [application.applicant.username for application in applications]
         return applicants
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', read_only=True)
     doer = serializers.CharField(source='doer.username', read_only=True)
-    applicants = serializers.SerializerMethodField()
+    applicants = serializers.SerializerMethodField(read_only=True)
     status = serializers.CharField(read_only=True)
     created_at = serializers.CharField(read_only=True)
     updated_at = serializers.CharField(read_only=True)
@@ -77,8 +77,8 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         model = Task
 
     def get_applicants(self, task):
-        applicantions = task.applications.all()
-        applicants = [application.applicant.username for application in applicantions]
+        applications = task.applications.all()
+        applicants = [application.applicant.username for application in applications]
         return applicants
 
 
@@ -107,11 +107,72 @@ class SubjectInfoSerializer(serializers.ModelSerializer):
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
+    applicant_username = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         fields = ('id',
+                  'applicant',
+                  'applicant_username',
                   'message',
                   'task',
                   'status',
                   'created_at',
                   'updated_at',)
         model = Application
+
+    def get_applicant_username(self, application):
+        return application.applicant.username
+
+
+class SetTaskDoerSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source='author.username', read_only=True)
+    applications = serializers.SerializerMethodField(read_only=True)
+    doer = serializers.SerializerMethodField(method_name='set_doer')
+    title = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=True)
+
+    class Meta:
+        fields = ('id',
+                  'author',
+                  'doer',
+                  'applications',
+                  'title',
+                  'status',)
+        model = Task
+
+    def set_doer(self, task):
+        doer_id = self.context['request'].data.get('doer')
+        if doer_id is None or self.context['request'].method != 'PUT':
+            if task.doer is not None:
+                return task.doer.id
+            return task.doer
+
+        # если еще нет doer; если accepting applications
+        assert (task.doer is None), f'This task (id = {task.id}) already have doer'
+        assert (task.status == 'A'), f'This task (id = {task.id}) status is {task.status}. ' \
+                                     f'It is not Acception Applications'
+        assert (doer_id in [application.applicant.id for application in task.applications.all()]), \
+            f'This user (id={doer_id}) haven\'t send application for this task (id={task.id})'
+
+        # если юзер у задания еще не задан,
+        # если задание принимает заявки,
+        # если юзер подавал заявку на исполнение, то
+        # иными словами "если все норм"
+        task.status = 'P'  # задание переходит в режим IN PROGRESS
+        task.doer = User.objects.get(id=doer_id)  # задать юзера как исполнителя
+        task.save()
+
+        applications = task.applications.all()
+        for application in applications:
+            if application.applicant.id == doer_id:
+                application.status = 'A'  # статус ACCEPTED
+            else:
+                application.status = 'R'  # статус REJECTED
+            application.save()
+
+        return doer_id
+
+    def get_applications(self, task):
+        applications = task.applications.all()
+        applications_info = [ApplicationSerializer(application).data for application in applications]
+        return applications_info

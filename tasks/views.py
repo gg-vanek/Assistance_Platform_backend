@@ -3,7 +3,7 @@ from rest_framework import generics, permissions
 
 from .models import Task, Application, TaskTag, TaskSubject
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
-    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer
+    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, SetTaskDoerSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
@@ -69,6 +69,20 @@ def search_in_tasks(queryset, search_query):
     return queryset
 
 
+# информационные эндпоинты
+class TagsInfo(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = TagInfoSerializer
+    queryset = TaskTag.objects.all()
+
+
+class SubjectsInfo(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = SubjectInfoSerializer
+    queryset = TaskSubject.objects.all()
+
+
+# эндпоинты для работы с заданиями
 class TaskList(generics.ListAPIView):
     # permission_classes = (permissions.IsAuthenticated,)
     permission_classes = (permissions.AllowAny,)
@@ -164,6 +178,7 @@ class CreateTask(generics.CreateAPIView):
         return self.create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
+        # TODO возможно нужно полностью перенести в метод create у сериализатора
         req_data = request.data.copy()
         data = {'author': request.user,
                 'status': 'A',
@@ -189,6 +204,31 @@ class CreateTask(generics.CreateAPIView):
         serializer.save(**data)
 
 
+# эндпоинты для работы с заявками
+class MyApplicationsList(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = ApplicationSerializer
+
+    def get_queryset(self):
+        queryset = Application.objects.filter(applicant=self.request.user)
+        application_status = self.request.query_params.get('application_status', None)
+        if application_status is not None:
+            application_status = application_status.split(',')
+            queryset = queryset.filter(status__in=application_status)
+
+        return queryset
+
+
+class ApplicationDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = ApplicationDetailSerializer
+
+    def get_queryset(self):
+        queryset = Application.objects.all()
+        queryset = queryset.filter(applicant=self.request.user)
+        return queryset
+
+
 class TaskApply(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = TaskApplySerializer
@@ -197,6 +237,7 @@ class TaskApply(generics.CreateAPIView):
         return self.create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
+        # перенести в метод create у сериализатора
         req_data = request.data.copy()
         task = Task.objects.get(pk=kwargs['pk'])
 
@@ -225,38 +266,9 @@ class TaskApply(generics.CreateAPIView):
         return serializer.save(**data)
 
 
-class ApplicationDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = ApplicationDetailSerializer
-
-    def get_queryset(self):
-        # TODO добавить проверку на наличие заявки от юзера
-        queryset = Application.objects.all()
-        queryset = queryset.filter(applicant=self.request.user)
-        return queryset
-
-
-class TagsInfo(generics.ListAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = TagInfoSerializer
-    queryset = TaskTag.objects.all()
-
-
-class SubjectsInfo(generics.ListAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = SubjectInfoSerializer
-    queryset = TaskSubject.objects.all()
-
-
-class MyApplicationsList(generics.ListAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = ApplicationSerializer
-
-    def get_queryset(self):
-        queryset = Application.objects.filter(applicant=self.request.user)
-        application_status = self.request.query_params.get('application_status', None)
-        if application_status is not None:
-            application_status = application_status.split(',')
-            queryset = queryset.filter(status__in=application_status)
-
-        return queryset
+class SetTaskDoer(generics.RetrieveUpdateAPIView):
+    # при GET запросе возвращается список заявок
+    # при пост запросе необходимо в теле запроса передать doer=userID и он установится как исполнитель
+    permission_classes = (IsTaskOwnerOrReadOnly, )
+    serializer_class = SetTaskDoerSerializer
+    queryset = Task.objects.all()
