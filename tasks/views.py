@@ -110,6 +110,27 @@ def get_filtering_by_author_params_url_params_version(request):
             'task_author': request.query_params.get('task_author', 'both')}
 
 
+def get_filtering_by_fields_params(request):
+    return {'tags': request.data.get('tags', None),
+            'tags_grouping_type': request.data.get('tags_grouping_type', 'or'),
+            'task_status': request.data.get('task_status', None),
+            'difficulty_stage_of_study': request.data.get('stage', None),
+            'difficulty_course_of_study_min': request.data.get('course_min', None),
+            'difficulty_course_of_study_max': request.data.get('course_max', None),
+            'subjects': request.data.get('subjects', None)}
+
+
+def get_filtering_by_date_params(request):
+    return {'date_start': request.data.get('date_start', None),
+            'date_end': request.data.get('date_end', None),
+            'date_type': request.data.get('date_type', 'created_at')}
+
+
+def get_filtering_by_author_params(request):
+    return {'user': request.user,
+            'task_author': request.data.get('task_author', 'both')}
+
+
 # информационные эндпоинты
 # TODO TagsInfo и SubjectsInfo возможно бесполезны => удалить
 class TagsInfo(generics.ListAPIView):
@@ -156,14 +177,14 @@ class TaskList(generics.ListAPIView):
         queryset = Task.objects.all()
 
         # фильтрация по полям
-        fields_filters = get_filtering_by_fields_params_url_params_version(request=self.request)
+        fields_filters = get_filtering_by_fields_params(request=self.request)
         queryset = filter_tasks_by_fields(queryset, **fields_filters)
         if isinstance(queryset, Response):
             response = queryset
             return response
 
         # фильтрация по времени
-        date_filters = get_filtering_by_date_params_url_params_version(request=self.request)
+        date_filters = get_filtering_by_date_params(request=self.request)
         queryset = filter_tasks_by_date(queryset, **date_filters)
         if isinstance(queryset, Response):
             response = queryset
@@ -191,21 +212,21 @@ class MyTasksList(generics.ListAPIView):
         queryset = Task.objects.all()
 
         # я/не я (я исполнитель)/оба варианта
-        author_filters = get_filtering_by_author_params_url_params_version(request=self.request)
+        author_filters = get_filtering_by_author_params(request=self.request)
         queryset = filter_tasks_by_author(queryset, **author_filters)
         if isinstance(queryset, Response):
             response = queryset
             return response
 
         # фильтрация по времени
-        date_filters = get_filtering_by_date_params_url_params_version(request=self.request)
+        date_filters = get_filtering_by_date_params(request=self.request)
         queryset = filter_tasks_by_date(queryset, **date_filters)
         if isinstance(queryset, Response):
             response = queryset
             return response
 
         # фильтрация по различным полям у заданий
-        fields_filters = get_filtering_by_fields_params_url_params_version(request=self.request)
+        fields_filters = get_filtering_by_fields_params(request=self.request)
         queryset = filter_tasks_by_fields(queryset, **fields_filters)
         if isinstance(queryset, Response):
             response = queryset
