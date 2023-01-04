@@ -31,7 +31,7 @@ def filter_tasks_by_date(queryset, date_start, date_end, date_type):
 
 
 def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, difficulty_stage_of_study,
-                           difficulty_course_of_study, subjects):
+                           difficulty_course_of_study_min, difficulty_course_of_study_max, subjects):
     if tags is not None:
         tags = tags.split(',')
         if tags_grouping_type == 'or':
@@ -56,8 +56,10 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
 
     if difficulty_stage_of_study is not None:
         queryset = queryset.filter(difficulty_stage_of_study=difficulty_stage_of_study)
-    if difficulty_course_of_study is not None:
-        queryset = queryset.filter(difficulty_course_of_study=difficulty_course_of_study)
+    if difficulty_course_of_study_min is not None:
+        queryset = queryset.filter(difficulty_course_of_study__gte=difficulty_course_of_study_min)
+    if difficulty_course_of_study_max is not None:
+        queryset = queryset.filter(difficulty_course_of_study__lte=difficulty_course_of_study_max)
     if subjects is not None:
         # учитывая что у задания поле subject - единственное => выводим только через "or"
         subjects = subjects.split(',')
@@ -73,6 +75,7 @@ def search_in_tasks(queryset, search_query):
 
 
 # информационные эндпоинты
+# TODO TagsInfo и SubjectsInfo возможно бесполезны => удалить
 class TagsInfo(generics.ListAPIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = TagInfoSerializer
@@ -95,7 +98,8 @@ def informational_endpoint_view(request):
                                                                   'tags': None,
                                                                   'task_status': TASK_STATUS_CHOICES,
                                                                   'difficulty_stage_of_study': STAGE_OF_STUDY_CHOICES,
-                                                                  'difficulty_course_of_study': [1, 15], #переделать на мин и макс
+                                                                  'course_min': 0,
+                                                                  'course_max': 15,
                                                                   'subjects': None},
                                                'search_filter': 'search_query',
                                                'date_filters': {'date_start': None, 'date_end': None,
@@ -120,7 +124,8 @@ class TaskList(generics.ListAPIView):
                           'tags_grouping_type': self.request.query_params.get('tags_grouping_type', 'or'),
                           'task_status': self.request.query_params.get('task_status', None),
                           'difficulty_stage_of_study': self.request.query_params.get('stage', None),
-                          'difficulty_course_of_study': self.request.query_params.get('course', None),
+                          'difficulty_course_of_study_min': self.request.query_params.get('course_min', None),
+                          'difficulty_course_of_study_max': self.request.query_params.get('course_max', None),
                           'subjects': self.request.query_params.get('subjects', None)}
         queryset = filter_tasks_by_fields(queryset, **fields_filters)
 
@@ -173,7 +178,8 @@ class MyTasksList(generics.ListAPIView):
                           'tags_grouping_type': self.request.query_params.get('tags_grouping_type', 'or'),
                           'task_status': self.request.query_params.get('task_status', None),
                           'difficulty_stage_of_study': self.request.query_params.get('stage', None),
-                          'difficulty_course_of_study': self.request.query_params.get('course', None),
+                          'difficulty_course_of_study_min': self.request.query_params.get('course_min', None),
+                          'difficulty_course_of_study_max': self.request.query_params.get('course_max', None),
                           'subjects': self.request.query_params.get('subjects', None)}
         queryset = filter_tasks_by_fields(queryset, **fields_filters)
 
