@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 
-from .models import Task, Application, TaskTag, TaskSubject
+from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
     ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, SetTaskDoerSerializer
 from rest_framework.response import Response
@@ -91,10 +91,17 @@ def informational_endpoint_view(request):
     information_dictionary = {'tags_info': [TagInfoSerializer(tag).data for tag in TaskTag.objects.all()],
                               'subjects_info': [SubjectInfoSerializer(subject).data for subject in
                                                 TaskSubject.objects.all()],
-                              'filters_info': {'fields_filters': '...',
-                                               'search_filter': '...',
-                                               'date_filters': '...',
-                                               'author_filters': '...'},
+                              'filters_info': {'fields_filters': {'tags_grouping_type': ['and', 'or'],
+                                                                  'tags': None,
+                                                                  'task_status': TASK_STATUS_CHOICES,
+                                                                  'difficulty_stage_of_study': STAGE_OF_STUDY_CHOICES,
+                                                                  'difficulty_course_of_study': [1, 15], #переделать на мин и макс
+                                                                  'subjects': None},
+                                               'search_filter': 'search_query',
+                                               'date_filters': {'date_start': None, 'date_end': None,
+                                                                'date_type': Task.datetime_fileds_names,
+                                                                'date_format': '%Y-%m-%d'},
+                                               'author_filters': {'task_author': ['me', 'notme', 'both']}},
                               'profile_choices_info': {'stage_of_study_choices': STAGE_OF_STUDY_CHOICES}}
 
     return Response(information_dictionary)

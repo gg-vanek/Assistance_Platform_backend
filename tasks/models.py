@@ -1,10 +1,12 @@
 import datetime
 
 from django.db import models
-from users.models import User
+from users.models import User, STAGE_OF_STUDY_CHOICES
 from django.conf import settings
 import os
 from django.core.validators import MaxValueValidator, MinValueValidator
+
+TASK_STATUS_CHOICES = [('A', 'accepting applications'), ('P', 'in progress'), ('C', 'closed')]
 
 
 class TaskTag(models.Model):
@@ -26,15 +28,6 @@ class Task(models.Model):
     doer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='doer')
     title = models.CharField(max_length=255)
 
-    STAGE_OF_STUDY_CHOICES = [
-        ('N', 'None'),
-        ('S', 'School'),
-        ('C', 'College'),
-        ('B', "bachelor's degree"),
-        ('M', "master's degree"),
-        ('PG', "postgraduate study"),
-    ]
-
     difficulty_stage_of_study = models.CharField(max_length=2, choices=STAGE_OF_STUDY_CHOICES, default='N')
     difficulty_course_of_study = models.IntegerField(default=0, validators=[
         MinValueValidator(0),
@@ -44,14 +37,21 @@ class Task(models.Model):
     subject = models.ForeignKey(TaskSubject, on_delete=models.SET_NULL, null=True)
     description = models.TextField()
 
-    STATUS_CHOICES = [('A', 'accepting applications'), ('P', 'in progress'), ('C', 'closed')]
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=1, choices=TASK_STATUS_CHOICES)
 
+    # dates
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     stop_accepting_applications_at = models.DateTimeField()
     expires_at = models.DateTimeField(default=None, null=True)
     closed_at = models.DateTimeField(default=None, null=True)
+    # этот список нужен, чтобы фронт знал по каким датам можно производить фильтрацию
+    datetime_fileds_names = {'created_at': 'Дата создания',
+                             'updated_at': 'Дата последнего редактирования',
+                             'stop_accepting_applications_at': 'Дата окончания приема заявок',
+                             'expires_at': 'Дедлайн по задаче',
+                             'closed_at': 'Дата закрытия задачи'}  # последнее поле - задача уже выполнена
+
     RATING_CHOICES = [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)]
     time_rate = models.IntegerField(choices=RATING_CHOICES, blank=True, null=True)
     accuracy_rate = models.IntegerField(choices=RATING_CHOICES, blank=True, null=True)
