@@ -49,7 +49,6 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', read_only=True)
     doer = serializers.CharField(source='doer.username', read_only=True)
     applicants = serializers.SerializerMethodField(read_only=True)
-    status = serializers.CharField(read_only=True)
     created_at = serializers.CharField(read_only=True)
     updated_at = serializers.CharField(read_only=True)
     expires_at = serializers.CharField(read_only=True)
@@ -69,8 +68,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'status',
                   'created_at',
                   'updated_at',
-                  'expires_at',
-                  )
+                  'expires_at',)
         model = Task
 
     def get_applicants(self, task):

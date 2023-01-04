@@ -31,5 +31,6 @@ class User(AbstractUser):
     contact_phone = models.CharField(max_length=16, blank=True)
     contact_email = models.EmailField(blank=True)
 
+    # TODO добавить больше контактов
     def __str__(self):
         return self.username
