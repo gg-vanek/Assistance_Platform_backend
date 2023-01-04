@@ -55,7 +55,7 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
         #                 status=status.HTTP_400_BAD_REQUEST)
 
     if difficulty_stage_of_study is not None:
-        queryset = queryset.filter(difficulty_stage_of_study=difficulty_stage_of_study)
+        queryset = queryset.filter(difficulty_stage_of_study__in=difficulty_stage_of_study.split(','))
     if difficulty_course_of_study_min is not None:
         queryset = queryset.filter(difficulty_course_of_study__gte=difficulty_course_of_study_min)
     if difficulty_course_of_study_max is not None:
@@ -97,7 +97,7 @@ def informational_endpoint_view(request):
                               'filters_info': {'fields_filters': {'tags_grouping_type': ['and', 'or'],
                                                                   'tags': None,
                                                                   'task_status': TASK_STATUS_CHOICES,
-                                                                  'difficulty_stage_of_study': STAGE_OF_STUDY_CHOICES,
+                                                                  'stage': STAGE_OF_STUDY_CHOICES,
                                                                   'course_min': 0,
                                                                   'course_max': 15,
                                                                   'subjects': None},
