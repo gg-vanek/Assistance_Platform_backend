@@ -89,46 +89,35 @@ def search_in_tasks(queryset, search_query):
     return queryset
 
 
-def get_filtering_by_fields_params_url_params_version(request):
-    return {'tags': request.query_params.get('tags', None),
-            'tags_grouping_type': request.query_params.get('tags_grouping_type', 'or'),
-            'task_status': request.query_params.get('task_status', None),
-            'difficulty_stage_of_study': request.query_params.get('stage', None),
-            'difficulty_course_of_study_min': request.query_params.get('course_min', None),
-            'difficulty_course_of_study_max': request.query_params.get('course_max', None),
-            'subjects': request.query_params.get('subjects', None)}
-
-
-def get_filtering_by_date_params_url_params_version(request):
-    return {'date_start': request.query_params.get('date_start', None),
-            'date_end': request.query_params.get('date_end', None),
-            'date_type': request.query_params.get('date_type', 'created_at')}
-
-
-def get_filtering_by_author_params_url_params_version(request):
-    return {'user': request.user,
-            'task_author': request.query_params.get('task_author', 'both')}
+# выбрать одну строчку из двух.
+# первая обозначает, что параметры фильтрации передаются в url_parameters
+# вторая обозначает, что параметры фильтрации передаются в теле запроса
+# filters_location_in_request_object = 'query_params'
+filters_location_in_request_object = 'data'
 
 
 def get_filtering_by_fields_params(request):
-    return {'tags': request.data.get('tags', None),
-            'tags_grouping_type': request.data.get('tags_grouping_type', 'or'),
-            'task_status': request.data.get('task_status', None),
-            'difficulty_stage_of_study': request.data.get('stage', None),
-            'difficulty_course_of_study_min': request.data.get('course_min', None),
-            'difficulty_course_of_study_max': request.data.get('course_max', None),
-            'subjects': request.data.get('subjects', None)}
+    all_filters = getattr(request, filters_location_in_request_object)
+    return {'tags': all_filters.get('tags', None),
+            'tags_grouping_type': all_filters.get('tags_grouping_type', 'or'),
+            'task_status': all_filters.get('task_status', None),
+            'difficulty_stage_of_study': all_filters.get('stage', None),
+            'difficulty_course_of_study_min': all_filters.get('course_min', None),
+            'difficulty_course_of_study_max': all_filters.get('course_max', None),
+            'subjects': all_filters.get('subjects', None)}
 
 
 def get_filtering_by_date_params(request):
-    return {'date_start': request.data.get('date_start', None),
-            'date_end': request.data.get('date_end', None),
-            'date_type': request.data.get('date_type', 'created_at')}
+    all_filters = getattr(request, filters_location_in_request_object)
+    return {'date_start': all_filters.get('date_start', None),
+            'date_end': all_filters.get('date_end', None),
+            'date_type': all_filters.get('date_type', 'created_at')}
 
 
 def get_filtering_by_author_params(request):
+    all_filters = getattr(request, filters_location_in_request_object)
     return {'user': request.user,
-            'task_author': request.data.get('task_author', 'both')}
+            'task_author': all_filters.get('task_author', 'both')}
 
 
 # информационные эндпоинты
