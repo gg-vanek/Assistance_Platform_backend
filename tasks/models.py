@@ -76,7 +76,8 @@ class Application(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    unique_together = ['applicant', 'task']
+    class Meta:
+        unique_together = ['applicant', 'task']
 
     def __str__(self):
         return str(self.applicant) + '. task ' + str(self.task.id) + '. application ' + str(self.id)
