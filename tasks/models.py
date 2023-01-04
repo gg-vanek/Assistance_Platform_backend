@@ -50,7 +50,7 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     stop_accepting_applications_at = models.DateTimeField()
-    expires_at = models.DateTimeField(default=datetime.datetime.now() + datetime.timedelta(days=7))
+    expires_at = models.DateTimeField(default=None, null=True)
     closed_at = models.DateTimeField(default=None, null=True)
     RATING_CHOICES = [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)]
     time_rate = models.IntegerField(choices=RATING_CHOICES, blank=True, null=True)
@@ -75,6 +75,8 @@ class Application(models.Model):
     status = models.CharField(default='S', max_length=1, choices=[('A', 'accepted'), ('R', 'rejected'), ('S', 'sent')])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    unique_together = ['applicant', 'task']
 
     def __str__(self):
         return str(self.applicant) + '. task ' + str(self.task.id) + '. application ' + str(self.id)

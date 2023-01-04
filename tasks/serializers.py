@@ -170,6 +170,8 @@ class SetTaskDoerSerializer(serializers.ModelSerializer):
                 application.status = 'R'  # статус REJECTED
             application.save()
 
+        # TODO TODO TODO обмен контактами
+
         return doer_id
 
     def get_applications(self, task):
