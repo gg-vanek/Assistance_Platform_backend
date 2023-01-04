@@ -30,6 +30,21 @@ def filter_tasks_by_date(queryset, date_start, date_end, date_type):
     return queryset
 
 
+def filter_tasks_by_author(queryset, task_author, user):
+    if task_author == 'me':
+        queryset = queryset.filter(author=user)
+    elif task_author == 'notme':
+        queryset = queryset.filter(doer=user)
+    elif task_author == 'both':
+        queryset = queryset.filter(Q(doer=user) | Q(author=user))
+    else:
+        return Response({'detail': f"URL parameter task_author is '{task_author}'"
+                                   f" but allowed values are 'both', 'me' and 'notme'"},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    return queryset
+
+
 def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, difficulty_stage_of_study,
                            difficulty_course_of_study_min, difficulty_course_of_study_max, subjects):
     if tags is not None:
@@ -72,6 +87,27 @@ def search_in_tasks(queryset, search_query):
     if search_query is not None:
         queryset = queryset.filter(title__contains=search_query)
     return queryset
+
+
+def get_filtering_by_fields_params_url_params_version(request):
+    return {'tags': request.query_params.get('tags', None),
+            'tags_grouping_type': request.query_params.get('tags_grouping_type', 'or'),
+            'task_status': request.query_params.get('task_status', None),
+            'difficulty_stage_of_study': request.query_params.get('stage', None),
+            'difficulty_course_of_study_min': request.query_params.get('course_min', None),
+            'difficulty_course_of_study_max': request.query_params.get('course_max', None),
+            'subjects': request.query_params.get('subjects', None)}
+
+
+def get_filtering_by_date_params_url_params_version(request):
+    return {'date_start': request.query_params.get('date_start', None),
+            'date_end': request.query_params.get('date_end', None),
+            'date_type': request.query_params.get('date_type', 'created_at')}
+
+
+def get_filtering_by_author_params_url_params_version(request):
+    return {'user': request.user,
+            'task_author': request.query_params.get('task_author', 'both')}
 
 
 # информационные эндпоинты
@@ -120,24 +156,25 @@ class TaskList(generics.ListAPIView):
         queryset = Task.objects.all()
 
         # фильтрация по полям
-        fields_filters = {'tags': self.request.query_params.get('tags', None),
-                          'tags_grouping_type': self.request.query_params.get('tags_grouping_type', 'or'),
-                          'task_status': self.request.query_params.get('task_status', None),
-                          'difficulty_stage_of_study': self.request.query_params.get('stage', None),
-                          'difficulty_course_of_study_min': self.request.query_params.get('course_min', None),
-                          'difficulty_course_of_study_max': self.request.query_params.get('course_max', None),
-                          'subjects': self.request.query_params.get('subjects', None)}
+        fields_filters = get_filtering_by_fields_params_url_params_version(request=self.request)
         queryset = filter_tasks_by_fields(queryset, **fields_filters)
+        if isinstance(queryset, Response):
+            response = queryset
+            return response
 
         # фильтрация по времени
-        date_filters = {'date_start': self.request.query_params.get('date_start', None),
-                        'date_end': self.request.query_params.get('date_end', None),
-                        'date_type': self.request.query_params.get('date_type', 'created_at')}
+        date_filters = get_filtering_by_date_params_url_params_version(request=self.request)
         queryset = filter_tasks_by_date(queryset, **date_filters)
+        if isinstance(queryset, Response):
+            response = queryset
+            return response
 
         # поисковой запрос по заголовкам
         search_query = self.request.query_params.get('search_query', None)
         queryset = search_in_tasks(queryset, search_query)
+        if isinstance(queryset, Response):
+            response = queryset
+            return response
 
         sort = self.request.query_params.get('sort')
 
@@ -154,38 +191,32 @@ class MyTasksList(generics.ListAPIView):
         queryset = Task.objects.all()
 
         # я/не я (я исполнитель)/оба варианта
-        task_author = self.request.query_params.get('task_author', 'both')
-
-        if task_author == 'me':
-            queryset = queryset.filter(author=self.request.user)
-        elif task_author == 'notme':
-            queryset = queryset.filter(doer=self.request.user)
-        elif task_author == 'both':
-            queryset = queryset.filter(Q(doer=self.request.user) | Q(author=self.request.user))
-        else:
-            return Response({'detail': f"URL parameter task_author is '{task_author}'"
-                                       f" but allowed values are 'both', 'me' and 'notme'"},
-                            status=status.HTTP_400_BAD_REQUEST)
+        author_filters = get_filtering_by_author_params_url_params_version(request=self.request)
+        queryset = filter_tasks_by_author(queryset, **author_filters)
+        if isinstance(queryset, Response):
+            response = queryset
+            return response
 
         # фильтрация по времени
-        date_filters = {'date_start': self.request.query_params.get('date_start', None),
-                        'date_end': self.request.query_params.get('date_end', None),
-                        'date_type': self.request.query_params.get('date_type', 'created_at')}
+        date_filters = get_filtering_by_date_params_url_params_version(request=self.request)
         queryset = filter_tasks_by_date(queryset, **date_filters)
+        if isinstance(queryset, Response):
+            response = queryset
+            return response
 
         # фильтрация по различным полям у заданий
-        fields_filters = {'tags': self.request.query_params.get('tags', None),
-                          'tags_grouping_type': self.request.query_params.get('tags_grouping_type', 'or'),
-                          'task_status': self.request.query_params.get('task_status', None),
-                          'difficulty_stage_of_study': self.request.query_params.get('stage', None),
-                          'difficulty_course_of_study_min': self.request.query_params.get('course_min', None),
-                          'difficulty_course_of_study_max': self.request.query_params.get('course_max', None),
-                          'subjects': self.request.query_params.get('subjects', None)}
+        fields_filters = get_filtering_by_fields_params_url_params_version(request=self.request)
         queryset = filter_tasks_by_fields(queryset, **fields_filters)
+        if isinstance(queryset, Response):
+            response = queryset
+            return response
 
         # поисковой запрос по заголовкам
         search_query = self.request.query_params.get('search_query', None)
         queryset = search_in_tasks(queryset, search_query)
+        if isinstance(queryset, Response):
+            response = queryset
+            return response
 
         sort = self.request.query_params.get('sort')
         if sort is not None:
