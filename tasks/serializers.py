@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from users.models import User
+from users.serializers import UserContactSerializer
 from .models import Task, Application, TaskTag, TaskSubject
 
 
@@ -53,6 +54,9 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     updated_at = serializers.CharField(read_only=True)
     expires_at = serializers.CharField(read_only=True)
 
+    author_contacts = serializers.SerializerMethodField(read_only=True)
+    doer_contacts = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         fields = ('id',
                   'author',
@@ -68,7 +72,9 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'status',
                   'created_at',
                   'updated_at',
-                  'expires_at',)
+                  'expires_at',
+                  'author_contacts',
+                  'doer_contacts',)
         model = Task
 
     def get_applicants(self, task):
@@ -76,6 +82,19 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         applicants = [application.applicant.username for application in applications]
         return applicants
 
+    def get_author_contacts(self, task):
+        user = self.context['request'].user
+        if user == task.doer:
+            return UserContactSerializer(task.author).data
+        else:
+            return None
+
+    def get_doer_contacts(self, task):
+        user = self.context['request'].user
+        if user == task.author:
+            return UserContactSerializer(task.doer).data
+        else:
+            return None
 
 class ApplicationSerializer(serializers.ModelSerializer):
     applicant_username = serializers.SerializerMethodField(read_only=True)

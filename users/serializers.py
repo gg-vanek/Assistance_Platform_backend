@@ -42,3 +42,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
 
+
+class UserContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'contact_phone',
+                  'contact_email',
+                  'contact_tg',
+                  'contact_vk',)
+        model = User
