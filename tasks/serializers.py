@@ -102,7 +102,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
     updated_at = serializers.CharField(read_only=True)
 
     class Meta:
-        fields = ('id', 'applicant', 'task', 'message', 'created_at', 'updated_at',)
+        fields = ('id', 'applicant', 'task', 'status', 'message', 'created_at', 'updated_at',)
         model = Application
 
 

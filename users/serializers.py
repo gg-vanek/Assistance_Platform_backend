@@ -24,7 +24,9 @@ class UserDetailSerializer(serializers.ModelSerializer):
                   'stage_of_study',
                   'course_of_study',
                   'contact_phone',
-                  'contact_email',)
+                  'contact_email',
+                  'contact_tg',
+                  'contact_vk',)
         model = User
 
 
