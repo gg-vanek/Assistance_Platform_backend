@@ -52,9 +52,10 @@ class Task(models.Model):
                              'expires_at': 'Дедлайн по задаче',
                              'closed_at': 'Дата закрытия задачи'}  # последнее поле - задача уже выполнена
 
-    RATING_CHOICES = [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)]
-    time_rate = models.IntegerField(choices=RATING_CHOICES, blank=True, null=True)
-    accuracy_rate = models.IntegerField(choices=RATING_CHOICES, blank=True, null=True)
+    author_rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], blank=True, null=True)
+    review_on_author = models.TextField(blank=True)
+    doer_rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], blank=True, null=True)
+    review_on_doer = models.TextField(blank=True)
 
     def __str__(self):
         return self.title
