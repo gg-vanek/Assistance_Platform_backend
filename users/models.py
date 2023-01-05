@@ -33,6 +33,11 @@ class User(AbstractUser):
     contact_tg = models.CharField(max_length=40, blank=True)
     contact_vk = models.CharField(max_length=40, blank=True)
 
+    author_rating_sum = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    author_rating_count = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    doer_rating_sum = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    doer_rating_count = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+
     # TODO добавить больше контактов
     def __str__(self):
         return self.username

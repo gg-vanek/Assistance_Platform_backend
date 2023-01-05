@@ -13,6 +13,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
+
+    author_rating_sum = serializers.IntegerField(read_only=True)
+    author_rating_count = serializers.IntegerField(read_only=True)
+    doer_rating_sum = serializers.IntegerField(read_only=True)
+    doer_rating_count = serializers.IntegerField(read_only=True)
+
     class Meta:
         fields = ('id',
                   'username',
@@ -26,7 +32,11 @@ class UserDetailSerializer(serializers.ModelSerializer):
                   'contact_phone',
                   'contact_email',
                   'contact_tg',
-                  'contact_vk',)
+                  'contact_vk',
+                  'author_rating_sum',
+                  'author_rating_count',
+                  'doer_rating_sum',
+                  'doer_rating_count',)
         model = User
 
 
