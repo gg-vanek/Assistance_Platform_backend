@@ -49,8 +49,10 @@ def filter_tasks_by_author(queryset, task_author, user):
 def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, difficulty_stage_of_study,
                            difficulty_course_of_study_min, difficulty_course_of_study_max, subjects):
     if tags is not None:
-        if not isinstance(tags, list):
+        if isinstance(tags, str):
             tags = tags.split(',')
+        if isinstance(tags, int):
+            tags = [tags]
         if tags_grouping_type == 'or':
             # выведи задания у которых есть tag1 or tag2 etc
             queryset = queryset.filter(tags__in=tags)
@@ -64,7 +66,7 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
                             status=status.HTTP_400_BAD_REQUEST)
 
     if task_status is not None:
-        if not isinstance(task_status, list):
+        if isinstance(task_status, str):
             task_status = task_status.split(',')
         queryset = queryset.filter(status__in=task_status)
         # TODO добавить защиту от дурака, который передаст кривые статусы
@@ -80,8 +82,10 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
         queryset = queryset.filter(difficulty_course_of_study__lte=difficulty_course_of_study_max)
     if subjects is not None:
         # учитывая что у задания поле subject - единственное => выводим только через "or"
-        if not isinstance(subjects, list):
+        if isinstance(subjects, str):
             subjects = subjects.split(',')
+        if isinstance(subjects, int):
+            subjects = [subjects]
         queryset = queryset.filter(subject__in=subjects)
 
     return queryset
@@ -96,8 +100,8 @@ def search_in_tasks(queryset, search_query):
 # выбрать одну строчку из двух.
 # первая обозначает, что параметры фильтрации передаются в url_parameters
 # вторая обозначает, что параметры фильтрации передаются в теле запроса
-# filters_location_in_request_object = 'query_params'
-filters_location_in_request_object = 'data'
+filters_location_in_request_object = 'query_params'
+# filters_location_in_request_object = 'data'
 
 
 def get_filtering_by_fields_params(request):

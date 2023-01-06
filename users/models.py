@@ -28,7 +28,7 @@ class User(AbstractUser):
         MinValueValidator(1),
         MaxValueValidator(15),
     ])
-    contact_phone = models.CharField(max_length=16, blank=True)
+    contact_phone = models.CharField(max_length=30, blank=True)
     contact_email = models.EmailField(blank=True)
     contact_tg = models.CharField(max_length=40, blank=True)
     contact_vk = models.CharField(max_length=40, blank=True)
