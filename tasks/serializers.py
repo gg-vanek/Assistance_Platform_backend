@@ -74,7 +74,11 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'updated_at',
                   'expires_at',
                   'author_contacts',
-                  'doer_contacts',)
+                  'doer_contacts',
+                  'author_rating',
+                  'review_on_author',
+                  'doer_rating',
+                  'review_on_doer')
         model = Task
 
     def validate_status(self, new_status):
