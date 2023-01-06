@@ -27,6 +27,7 @@ class Task(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='author')
     doer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='doer')
     title = models.CharField(max_length=255)
+    price = models.IntegerField(default=None, null=True)
 
     difficulty_stage_of_study = models.CharField(max_length=2, choices=STAGE_OF_STUDY_CHOICES, default='N')
     difficulty_course_of_study = models.IntegerField(default=0, validators=[

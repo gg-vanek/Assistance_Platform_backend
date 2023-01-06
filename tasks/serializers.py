@@ -25,6 +25,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id',
                   'title',
+                  'price',
                   'author',
                   'doer',
                   'applicants',
@@ -63,6 +64,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'doer',
                   'applicants',
                   'title',
+                  'price',
                   'difficulty_stage_of_study',
                   'difficulty_course_of_study',
                   'tags',

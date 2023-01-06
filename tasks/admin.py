@@ -10,7 +10,7 @@ class TaskAdmin(admin.ModelAdmin):
                     'created_at', 'stop_accepting_applications_at', 'expires_at')
 
     fieldsets = (
-        ('Task short info', {'fields': ('title',)}),
+        ('Task short info', {'fields': ('title', 'price')}),
         ('Author and Doer', {'fields': ('author', 'doer',)}),
         ('Task info', {'fields': ('description', 'subject', 'tags', 'status',)}),
         ('Difficulty', {'fields': ('difficulty_stage_of_study', 'difficulty_course_of_study',)}),
