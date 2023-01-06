@@ -103,8 +103,6 @@ def search_in_tasks(queryset, search_query):
 # первая обозначает, что параметры фильтрации передаются в url_parameters
 # вторая обозначает, что параметры фильтрации передаются в теле запроса
 filters_location_in_request_object = 'query_params'
-
-
 # filters_location_in_request_object = 'data'
 
 
@@ -124,12 +122,6 @@ def get_filtering_by_date_params(request):
     return {'date_start': all_filters.get('date_start', None),
             'date_end': all_filters.get('date_end', None),
             'date_type': all_filters.get('date_type', 'created_at')}
-
-
-def get_filtering_by_author_params(request):
-    all_filters = getattr(request, filters_location_in_request_object)
-    return {'user': request.user,
-            'task_author': all_filters.get('task_author', 'both')}
 
 
 # информационные эндпоинты
@@ -154,7 +146,8 @@ def informational_endpoint_view(request):
                          'updated_at': 'Дата последнего редактирования',
                          'stop_accepting_applications_at': 'Дата планируемого окончания рпиема заявок',
                          'expires_at': 'Дата планируемого закрытия задачи',
-                         'closed_at': 'Дата закрытия задачи'}
+                         'closed_at': 'Дата закрытия задачи',
+                         'price': 'Вознаграждение за решение'}
 
     sort_fields_info = {}
     for sort_field in sort_fields:
@@ -351,10 +344,11 @@ class SetTaskDoer(generics.RetrieveUpdateAPIView):
     queryset = Task.objects.all()
 
 
+# работа с отзывами
 class ReviewOnTask(generics.RetrieveUpdateAPIView):
     # TODO create
     # при GET запросе возвращается список заявок
     # при пост запросе необходимо в теле запроса передать doer=userID и он установится как исполнитель
-    permission_classes = (permissions.IsAuthenticated, IsTaskOwnerOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = ReviewOnTaskDetailSerializer
     queryset = Task.objects.all()
