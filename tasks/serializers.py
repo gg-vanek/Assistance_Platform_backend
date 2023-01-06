@@ -169,11 +169,14 @@ class SetTaskDoerSerializer(serializers.ModelSerializer):
             return task.doer
 
         # если еще нет doer; если accepting applications
-        assert (task.doer is None), f'This task (id = {task.id}) already have doer'
-        assert (task.status == 'A'), f'This task (id = {task.id}) status is {task.status}. ' \
-                                     f'It is not Acception Applications'
-        assert (doer_id in [application.applicant.id for application in task.applications.all()]), \
-            f'This user (id={doer_id}) haven\'t send application for this task (id={task.id})'
+        if not (task.doer is None):
+            raise serializers.ValidationError(f'This task (id = {task.id}) already have doer')
+        if not (task.status == 'A'):
+            raise serializers.ValidationError(f'This task (id = {task.id}) status is {task.status}. '
+                                        f'It is not Acception Applications')
+        if not (doer_id in [application.applicant.id for application in task.applications.all()]):
+            raise serializers.ValidationError(
+                f'This user (id={doer_id}) haven\'t send application for this task (id={task.id})')
 
         # если юзер у задания еще не задан,
         # если задание принимает заявки,
@@ -212,4 +215,3 @@ class ReviewOnTaskDetailSerializer(serializers.ModelSerializer):
                   'status',
                   'closed')
         model = Task
-
