@@ -132,31 +132,35 @@ def get_filtering_by_author_params(request):
 
 
 # информационные эндпоинты
-# TODO TagsInfo и SubjectsInfo возможно бесполезны => удалить
-class TagsInfo(generics.ListAPIView):
-    permission_classes = (permissions.AllowAny,)
-    serializer_class = TagInfoSerializer
-    queryset = TaskTag.objects.all()
-
-
-class SubjectsInfo(generics.ListAPIView):
-    permission_classes = (permissions.AllowAny,)
-    serializer_class = SubjectInfoSerializer
-    queryset = TaskSubject.objects.all()
-
-
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def informational_endpoint_view(request):
     # TODO добавить сортировку по рейтингу автора задачи
     sort_fields = [field.name for field in Task._meta.get_fields()]
 
-    not_for_sort_fields = ["applications", "files", "author", "doer", "description", "author_rating",
-                           "review_on_author", "doer_rating", "review_on_doer", "tags"]
+    not_for_sort_fields = ["id", "applications", "files", "difficulty_stage_of_study", "author", "doer", "description",
+                           "author_rating", "review_on_author", "doer_rating", "review_on_doer", "tags"]
 
     for field in not_for_sort_fields:
         if field in sort_fields:
             sort_fields.remove(field)
+
+    sort_fields_names = {'title': 'Название',
+                         'difficulty_course_of_study': 'Класс/курс обучения',
+                         'subject': 'Предмет',
+                         'status': 'Статус задачи',
+                         'created_at': 'Дата создания',
+                         'updated_at': 'Дата последнего редактирования',
+                         'stop_accepting_applications_at': 'Дата планируемого окончания рпиема заявок',
+                         'expires_at': 'Дата планируемого закрытия задачи',
+                         'closed_at': 'Дата закрытия задачи'}
+
+    sort_fields_info = {}
+    for sort_field in sort_fields:
+        if sort_field in sort_fields_names:
+            sort_fields_info[sort_field] = sort_fields_names[sort_field]
+        else:
+            sort_fields_info[sort_field] = sort_field
 
     information_dictionary = {'tags_info': [TagInfoSerializer(tag).data for tag in TaskTag.objects.all()],
                               'subjects_info': [SubjectInfoSerializer(subject).data for subject in
@@ -172,8 +176,7 @@ def informational_endpoint_view(request):
                                                'date_filters': {'date_start': None, 'date_end': None,
                                                                 'date_type': Task.datetime_fileds_names,
                                                                 'date_format': '%Y-%m-%d'},
-                                               'author_filters': {'task_author': ['me', 'notme', 'both']},
-                                               'sort': sort_fields},
+                                               'sort': sort_fields_info},
                               'profile_choices_info': {'stage_of_study_choices': STAGE_OF_STUDY_CHOICES}}
 
     return Response(information_dictionary)

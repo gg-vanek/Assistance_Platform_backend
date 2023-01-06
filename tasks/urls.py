@@ -1,6 +1,5 @@
 from django.urls import path
-from .views import TaskList, TaskDetail, CreateTask, TaskApply, ApplicationDetail, TagsInfo, SubjectsInfo, SetTaskDoer, \
-    ReviewOnTask
+from .views import TaskList, TaskDetail, CreateTask, TaskApply, ApplicationDetail, SetTaskDoer, ReviewOnTask
 
 urlpatterns = [
     path('', TaskList.as_view()),
@@ -12,8 +11,4 @@ urlpatterns = [
     # path('<int:pk>/review', ReviewOnTask.as_view()),
     # path('<int:pk>/reviews', ///.as_view()),
     path('new_task', CreateTask.as_view()),
-
-    # TODO возможно бесполезны => удалить
-    path('tags_info', TagsInfo.as_view()),
-    path('subjects_info', SubjectsInfo.as_view()),
 ]
