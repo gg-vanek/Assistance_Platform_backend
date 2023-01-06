@@ -17,6 +17,22 @@ from .permissions import IsTaskOwnerOrReadOnly
 from users.models import STAGE_OF_STUDY_CHOICES
 
 
+def filter_for_person(queryset, request):
+    kwarg = request.parser_context['kwargs']
+    kwarg_key = list(kwarg.keys())[0]
+    if kwarg_key == 'authorid':
+        queryset = queryset.filter(author__id=kwarg[kwarg_key])
+    elif kwarg_key == 'doerid':
+        queryset = queryset.filter(doer__id=kwarg[kwarg_key])
+    elif kwarg_key == 'authorusername':
+        queryset = queryset.filter(author__username=kwarg[kwarg_key])
+    elif kwarg_key == 'doerusername':
+        queryset = queryset.filter(doer__username=kwarg[kwarg_key])
+    else:
+        pass
+    return queryset
+
+
 def filter_tasks_by_date(queryset, date_start, date_end, date_type):
     date_filtering_dict = {}
     if date_start is not None:
@@ -27,21 +43,6 @@ def filter_tasks_by_date(queryset, date_start, date_end, date_type):
     if date_filtering_dict:
         # TODO добавить защиту от дурака, который передаст кривую дату
         queryset = queryset.filter(**date_filtering_dict)
-
-    return queryset
-
-
-def filter_tasks_by_author(queryset, task_author, user):
-    if task_author == 'me':
-        queryset = queryset.filter(author=user)
-    elif task_author == 'notme':
-        queryset = queryset.filter(doer=user)
-    elif task_author == 'both':
-        queryset = queryset.filter(Q(doer=user) | Q(author=user))
-    else:
-        return Response({'detail': f"URL parameter task_author is '{task_author}'"
-                                   f" but allowed values are 'both', 'me' and 'notme'"},
-                        status=status.HTTP_400_BAD_REQUEST)
 
     return queryset
 
@@ -101,6 +102,8 @@ def search_in_tasks(queryset, search_query):
 # первая обозначает, что параметры фильтрации передаются в url_parameters
 # вторая обозначает, что параметры фильтрации передаются в теле запроса
 filters_location_in_request_object = 'query_params'
+
+
 # filters_location_in_request_object = 'data'
 
 
@@ -183,6 +186,8 @@ class TaskList(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Task.objects.all()
+        if self.request.parser_context['kwargs']:
+            queryset = filter_for_person(queryset, self.request)
 
         # фильтрация по полям
         fields_filters = get_filtering_by_fields_params(request=self.request)
@@ -209,59 +214,6 @@ class TaskList(generics.ListAPIView):
 
         if sort is not None:
             queryset = queryset.order_by(sort)
-        return queryset.distinct()
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response({'tasks': serializer.data, 'filters': getattr(request, filters_location_in_request_object)})
-
-
-class MyTasksList(generics.ListAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = TaskSerializer
-
-    def get_queryset(self):
-        queryset = Task.objects.all()
-
-        # я/не я (я исполнитель)/оба варианта
-        author_filters = get_filtering_by_author_params(request=self.request)
-        queryset = filter_tasks_by_author(queryset, **author_filters)
-        if isinstance(queryset, Response):
-            response = queryset
-            return response
-
-        # фильтрация по времени
-        date_filters = get_filtering_by_date_params(request=self.request)
-        queryset = filter_tasks_by_date(queryset, **date_filters)
-        if isinstance(queryset, Response):
-            response = queryset
-            return response
-
-        # фильтрация по различным полям у заданий
-        fields_filters = get_filtering_by_fields_params(request=self.request)
-        queryset = filter_tasks_by_fields(queryset, **fields_filters)
-        if isinstance(queryset, Response):
-            response = queryset
-            return response
-
-        # поисковой запрос по заголовкам
-        search_query = self.request.query_params.get('search_query', None)
-        queryset = search_in_tasks(queryset, search_query)
-        if isinstance(queryset, Response):
-            response = queryset
-            return response
-
-        sort = self.request.query_params.get('sort')
-        if sort is not None:
-            queryset = queryset.order_by(sort)
-
         return queryset.distinct()
 
     def list(self, request, *args, **kwargs):
@@ -322,9 +274,16 @@ class MyApplicationsList(generics.ListAPIView):
     serializer_class = ApplicationSerializer
 
     def get_queryset(self):
-        queryset = Application.objects.filter(applicant=self.request.user)
+        queryset = []
+        if 'userid' in self.request.parser_context['kwargs'] \
+                and self.request.user.id == self.request.parser_context['kwargs']['userid']:
+            queryset = Application.objects.filter(applicant=self.request.user)
+        elif 'username' in self.request.parser_context['kwargs'] \
+                and self.request.user.username == self.request.parser_context['kwargs']['username']:
+            queryset = Application.objects.filter(applicant=self.request.user)
+
         application_status = self.request.query_params.get('application_status', None)
-        if application_status is not None:
+        if application_status is not None and not isinstance(queryset, list):
             application_status = application_status.split(',')
             queryset = queryset.filter(status__in=application_status)
 
