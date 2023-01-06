@@ -4,7 +4,8 @@ from rest_framework.decorators import api_view, permission_classes
 
 from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
-    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, SetTaskDoerSerializer
+    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, SetTaskDoerSerializer, \
+    ReviewOnTaskDetailSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
@@ -48,7 +49,8 @@ def filter_tasks_by_author(queryset, task_author, user):
 def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, difficulty_stage_of_study,
                            difficulty_course_of_study_min, difficulty_course_of_study_max, subjects):
     if tags is not None:
-        tags = tags.split(',')
+        if not isinstance(tags, list):
+            tags = tags.split(',')
         if tags_grouping_type == 'or':
             # выведи задания у которых есть tag1 or tag2 etc
             queryset = queryset.filter(tags__in=tags)
@@ -62,7 +64,8 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
                             status=status.HTTP_400_BAD_REQUEST)
 
     if task_status is not None:
-        task_status = task_status.split(',')
+        if not isinstance(task_status, list):
+            task_status = task_status.split(',')
         queryset = queryset.filter(status__in=task_status)
         # TODO добавить защиту от дурака, который передаст кривые статусы
         # return Response({'detail': f"URL parameter task_status is '{task_status}'"
@@ -77,7 +80,8 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
         queryset = queryset.filter(difficulty_course_of_study__lte=difficulty_course_of_study_max)
     if subjects is not None:
         # учитывая что у задания поле subject - единственное => выводим только через "or"
-        subjects = subjects.split(',')
+        if not isinstance(subjects, list):
+            subjects = subjects.split(',')
         queryset = queryset.filter(subject__in=subjects)
 
     return queryset
@@ -85,7 +89,7 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
 
 def search_in_tasks(queryset, search_query):
     if search_query is not None:
-        queryset = queryset.filter(title__contains=search_query)
+        queryset = queryset.filter(title__icontains=search_query)
     return queryset
 
 
@@ -137,6 +141,16 @@ class SubjectsInfo(generics.ListAPIView):
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def informational_endpoint_view(request):
+    # TODO добавить сортировку по рейтингу автора задачи
+    sort_fields = [field.name for field in Task._meta.get_fields()]
+
+    not_for_sort_fields = ["applications", "files", "author", "doer", "description", "author_rating",
+                           "review_on_author", "doer_rating", "review_on_doer", "tags"]
+
+    for field in not_for_sort_fields:
+        if field in sort_fields:
+            sort_fields.remove(field)
+
     information_dictionary = {'tags_info': [TagInfoSerializer(tag).data for tag in TaskTag.objects.all()],
                               'subjects_info': [SubjectInfoSerializer(subject).data for subject in
                                                 TaskSubject.objects.all()],
@@ -151,7 +165,8 @@ def informational_endpoint_view(request):
                                                'date_filters': {'date_start': None, 'date_end': None,
                                                                 'date_type': Task.datetime_fileds_names,
                                                                 'date_format': '%Y-%m-%d'},
-                                               'author_filters': {'task_author': ['me', 'notme', 'both']}},
+                                               'author_filters': {'task_author': ['me', 'notme', 'both']},
+                                               'sort': sort_fields},
                               'profile_choices_info': {'stage_of_study_choices': STAGE_OF_STUDY_CHOICES}}
 
     return Response(information_dictionary)
@@ -191,6 +206,17 @@ class TaskList(generics.ListAPIView):
         if sort is not None:
             queryset = queryset.order_by(sort)
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'tasks': serializer.data, 'filters': getattr(request, filters_location_in_request_object)})
 
 
 class MyTasksList(generics.ListAPIView):
@@ -233,6 +259,17 @@ class MyTasksList(generics.ListAPIView):
             queryset = queryset.order_by(sort)
 
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'tasks': serializer.data, 'filters': getattr(request, filters_location_in_request_object)})
 
 
 class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -342,4 +379,13 @@ class SetTaskDoer(generics.RetrieveUpdateAPIView):
     # при пост запросе необходимо в теле запроса передать doer=userID и он установится как исполнитель
     permission_classes = (permissions.IsAuthenticated, IsTaskOwnerOrReadOnly,)
     serializer_class = SetTaskDoerSerializer
+    queryset = Task.objects.all()
+
+
+class ReviewOnTask(generics.RetrieveUpdateAPIView):
+    # TODO create
+    # при GET запросе возвращается список заявок
+    # при пост запросе необходимо в теле запроса передать doer=userID и он установится как исполнитель
+    permission_classes = (permissions.IsAuthenticated, IsTaskOwnerOrReadOnly,)
+    serializer_class = ReviewOnTaskDetailSerializer
     queryset = Task.objects.all()

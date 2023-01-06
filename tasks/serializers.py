@@ -96,6 +96,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         else:
             return None
 
+
 class ApplicationSerializer(serializers.ModelSerializer):
     applicant_username = serializers.SerializerMethodField(read_only=True)
 
@@ -198,3 +199,17 @@ class SetTaskDoerSerializer(serializers.ModelSerializer):
         applications = task.applications.all()
         applications_info = [ApplicationSerializer(application).data for application in applications]
         return applications_info
+
+
+class ReviewOnTaskDetailSerializer(serializers.ModelSerializer):
+    # выдает всю инфу о задании в рид онли.
+    # принимает 2 поля рейтинг и отзыв, но они доступны только для создателя задачи и исполнителя.
+    # в зависимости от того, кто сделал запрос заносить ре
+    class Meta:
+        fields = ('id',
+                  'title',
+                  'doer',
+                  'status',
+                  'closed')
+        model = Task
+
