@@ -23,8 +23,8 @@ class CurrentUserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserDetailSerializer
 
     def get_object(self):
-        obj = self.request.user
-        return obj
+        user = self.request.user
+        return user
 
 
 class UserRegistration(generics.CreateAPIView):

@@ -10,7 +10,7 @@ from rest_framework.response import Response
 
 from rest_framework import status
 from rest_framework.settings import api_settings
-from django.http import HttpResponse
+from django.http import Http404
 import datetime
 from .permissions import IsTaskOwnerOrReadOnly
 
@@ -277,14 +277,14 @@ class MyApplicationsList(generics.ListAPIView):
     serializer_class = ApplicationSerializer
 
     def get_queryset(self):
-        queryset = []
         if 'userid' in self.request.parser_context['kwargs'] \
                 and self.request.user.id == self.request.parser_context['kwargs']['userid']:
             queryset = Application.objects.filter(applicant=self.request.user)
         elif 'username' in self.request.parser_context['kwargs'] \
                 and self.request.user.username == self.request.parser_context['kwargs']['username']:
             queryset = Application.objects.filter(applicant=self.request.user)
-
+        else:
+            raise Http404
         application_status = self.request.query_params.get('application_status', None)
         if application_status is not None and not isinstance(queryset, list):
             application_status = application_status.split(',')
