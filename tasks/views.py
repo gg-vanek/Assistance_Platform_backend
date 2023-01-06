@@ -209,7 +209,7 @@ class TaskList(generics.ListAPIView):
 
         if sort is not None:
             queryset = queryset.order_by(sort)
-        return queryset
+        return queryset.distinct()
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -262,7 +262,7 @@ class MyTasksList(generics.ListAPIView):
         if sort is not None:
             queryset = queryset.order_by(sort)
 
-        return queryset
+        return queryset.distinct()
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
