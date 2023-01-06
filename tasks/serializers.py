@@ -77,6 +77,37 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'doer_contacts',)
         model = Task
 
+    def validate_status(self, new_status):
+        task = self.instance
+        old_status = task.status
+        if old_status != new_status:
+            if old_status == 'A':
+                if new_status == 'P' and task.doer is None:  # нет автора => нельзя переключить из A в P
+                    raise serializers.ValidationError(
+                        "This task doesn't have doer. You cant set it's status to 'In progress'")
+                if new_status == 'C':
+                    pass  # всегда можно закрыть задание
+            if old_status == 'P':
+                if new_status == 'A' and task.doer is not None:  # нет автора => нельзя переключить из A в P
+                    raise serializers.ValidationError(
+                        "This task already have doer. You cant set it's status to 'Accepting applications'")
+                if new_status == 'C':
+                    pass  # всегда можно закрыть задание
+            if old_status == 'C':
+                if new_status == 'P':
+                    if task.doer is None:
+                        raise serializers.ValidationError(
+                            "This task doesn't have doer. You cant set it's status to 'In progress'")
+                    elif task.author_rating or task.doer_rating:
+                        raise serializers.ValidationError(
+                            "This task already have review. You cant set it's status to 'In progress'")
+                if new_status == 'A':
+                    if task.doer is not None:
+                        raise serializers.ValidationError(
+                            "This task already have doer. You cant set it's status to 'Accepting applications'")
+
+        return new_status
+
     def get_applicants(self, task):
         applications = task.applications.all()
         applicants = [application.applicant.username for application in applications]
@@ -173,7 +204,7 @@ class SetTaskDoerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f'This task (id = {task.id}) already have doer')
         if not (task.status == 'A'):
             raise serializers.ValidationError(f'This task (id = {task.id}) status is {task.status}. '
-                                        f'It is not Acception Applications')
+                                              f'It is not Acception Applications')
         if not (doer_id in [application.applicant.id for application in task.applications.all()]):
             raise serializers.ValidationError(
                 f'This user (id={doer_id}) haven\'t send application for this task (id={task.id})')
