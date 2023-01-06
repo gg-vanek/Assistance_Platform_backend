@@ -1,6 +1,7 @@
 from django.db.models import Q
 from rest_framework import generics, permissions
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied
 
 from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
@@ -10,7 +11,7 @@ from rest_framework.response import Response
 
 from rest_framework import status
 from rest_framework.settings import api_settings
-from django.http import Http404
+from django.http import Http404, HttpResponseForbidden
 import datetime
 from .permissions import IsTaskOwnerOrReadOnly
 
@@ -272,19 +273,21 @@ class CreateTask(generics.CreateAPIView):
 
 
 # эндпоинты для работы с заявками
-class MyApplicationsList(generics.ListAPIView):
+class ApplicationsList(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = ApplicationSerializer
 
     def get_queryset(self):
-        if 'userid' in self.request.parser_context['kwargs'] \
-                and self.request.user.id == self.request.parser_context['kwargs']['userid']:
-            queryset = Application.objects.filter(applicant=self.request.user)
-        elif 'username' in self.request.parser_context['kwargs'] \
-                and self.request.user.username == self.request.parser_context['kwargs']['username']:
-            queryset = Application.objects.filter(applicant=self.request.user)
+        userid = self.request.parser_context['kwargs'].get('userid', None)
+        username = self.request.parser_context['kwargs'].get('username', None)
+
+        if userid is not None and (self.request.user.id == userid or self.request.user.is_staff):
+            queryset = Application.objects.filter(applicant__id=userid)
+
+        elif username is not None and (self.request.user.username == username or self.request.user.is_staff):
+            queryset = Application.objects.filter(applicant__username=username)
         else:
-            raise Http404
+            raise PermissionDenied()
         application_status = self.request.query_params.get('application_status', None)
         if application_status is not None and not isinstance(queryset, list):
             application_status = application_status.split(',')
