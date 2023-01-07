@@ -49,13 +49,16 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
 
     def get_my_tasks_amount(self, user):
-        return Task.objects.filter(author=user).count()
+        all_tasks = Task.objects.filter(author=user)
+        return [all_tasks.filter(status__in=['A', 'P']).count(), all_tasks.count()]
 
     def get_todo_tasks_amount(self, user):
-        return Task.objects.filter(doer=user).count()
+        all_tasks = Task.objects.filter(doer=user)
+        return [all_tasks.filter(status='P').count(), all_tasks.count()]
 
     def get_my_applications_amount(self, user):
-        return Application.objects.filter(applicant=user).count()
+        all_applications = Application.objects.filter(applicant=user)
+        return [all_applications.filter(status='S'), all_applications.count()]
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
