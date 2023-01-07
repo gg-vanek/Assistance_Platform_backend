@@ -1,17 +1,14 @@
-from django.db.models import Q
 from rest_framework import generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
 
 from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
-    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, SetTaskDoerSerializer, \
-    ReviewOnTaskDetailSerializer
+    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, \
+    SetTaskDoerSerializer, ReviewOnTaskDetailSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
-from rest_framework.settings import api_settings
-from django.http import Http404, HttpResponseForbidden
 import datetime
 from .permissions import IsTaskOwnerOrReadOnly
 
@@ -71,10 +68,6 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
         if isinstance(task_status, str):
             task_status = task_status.split(',')
         queryset = queryset.filter(status__in=task_status)
-        # TODO добавить защиту от дурака, который передаст кривые статусы
-        # return Response({'detail': f"URL parameter task_status is '{task_status}'"
-        #                            f" but allowed values are 'A', 'P' and 'C'"},
-        #                 status=status.HTTP_400_BAD_REQUEST)
 
     if difficulty_stage_of_study is not None:
         queryset = queryset.filter(difficulty_stage_of_study__in=difficulty_stage_of_study.split(','))
@@ -209,7 +202,7 @@ class TaskList(generics.ListAPIView):
 
         sort = self.request.query_params.get('sort')
 
-        if sort is not None:
+        if sort is not None and sort != '-':
             queryset = queryset.order_by(sort)
         return queryset.distinct()
 
