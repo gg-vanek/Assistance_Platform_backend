@@ -55,10 +55,10 @@ class User(AbstractUser):
         MinValueValidator(1),
         MaxValueValidator(15),
     ])
-    contact_phone = models.CharField(max_length=30, null=True, default=None)
+    contact_phone = models.CharField(max_length=30, null=True, default=None, blank=True)
     contact_email = models.EmailField(null=True, default=None)
-    contact_tg = models.CharField(max_length=40, null=True, default=None)
-    contact_vk = models.CharField(max_length=40, null=True, default=None)
+    contact_tg = models.CharField(max_length=40, null=True, default=None, blank=True)
+    contact_vk = models.CharField(max_length=40, null=True, default=None, blank=True)
 
     author_rating_sum = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     author_rating_count = models.IntegerField(default=0, validators=[MinValueValidator(0)])
