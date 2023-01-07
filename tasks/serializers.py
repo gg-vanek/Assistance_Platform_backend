@@ -51,9 +51,9 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', read_only=True)
     doer = serializers.CharField(source='doer.username', read_only=True)
     applicants = serializers.SerializerMethodField(read_only=True)
-    created_at = serializers.CharField(read_only=True)
-    updated_at = serializers.CharField(read_only=True)
-    expires_at = serializers.CharField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+    expires_at = serializers.DateTimeField()
 
     author_contacts = serializers.SerializerMethodField(read_only=True)
     doer_contacts = serializers.SerializerMethodField(read_only=True)
@@ -138,8 +138,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
     applicant_username = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        fields = ('id',
-                  'applicant',
+        fields = ('applicant',
                   'applicant_username',
                   'message',
                   'task',
@@ -183,19 +182,15 @@ class TaskCreateSerializer(serializers.ModelSerializer):
 
 
 class SetTaskDoerSerializer(serializers.ModelSerializer):
-    author = serializers.CharField(source='author.username', read_only=True)
+    task = serializers.SerializerMethodField(read_only=True)
     applications = serializers.SerializerMethodField(read_only=True)
     doer = serializers.SerializerMethodField(method_name='set_doer')
-    title = serializers.CharField(read_only=True)
-    status = serializers.CharField(read_only=True)
 
     class Meta:
         fields = ('id',
-                  'author',
                   'doer',
-                  'applications',
-                  'title',
-                  'status',)
+                  'task',
+                  'applications',)
         model = Task
 
     def set_doer(self, task):
@@ -231,14 +226,15 @@ class SetTaskDoerSerializer(serializers.ModelSerializer):
                 application.status = 'R'  # статус REJECTED
             application.save()
 
-        # TODO TODO TODO обмен контактами
-
         return doer_id
 
     def get_applications(self, task):
         applications = task.applications.all()
         applications_info = [ApplicationSerializer(application).data for application in applications]
         return applications_info
+
+    def get_task(self, task):
+        return TaskDetailSerializer(task, context=self.context)
 
 
 class ReviewOnTaskDetailSerializer(serializers.ModelSerializer):
