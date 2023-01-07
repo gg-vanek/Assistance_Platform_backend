@@ -315,9 +315,12 @@ class TaskApply(generics.CreateAPIView):
         if request.user == task.author:
             return Response({'detail': "Cоздатель задачи не может быть ее исполнителем"},
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        if task.status != 'A':
+            return Response({'detail': f"Статус задачи {task.status}. Отправка заявок на нее недоступна"},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
         if any([application.applicant == request.user for application in task.applications.all()]):
             # если уже была такая заявка на это задание то ничего не меняем
-            return Response({'detail': "Ваша заявка уже принята вы не можете добавить новую,"
+            return Response({'detail': "Ваша заявка уже отправлена вы не можете добавить новую,"
                                        " но можете отредактировать старую"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         self.perform_create(serializer, data)
