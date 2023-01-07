@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from tasks.models import Task, Application
 from .models import User
 
 
@@ -13,11 +15,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-
     author_rating_sum = serializers.IntegerField(read_only=True)
     author_rating_count = serializers.IntegerField(read_only=True)
     doer_rating_sum = serializers.IntegerField(read_only=True)
     doer_rating_count = serializers.IntegerField(read_only=True)
+
+    my_tasks_amount = serializers.SerializerMethodField(read_only=True)
+    todo_tasks_amount = serializers.SerializerMethodField(read_only=True)
+    my_applications_amount = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         fields = ('id',
@@ -36,8 +41,21 @@ class UserDetailSerializer(serializers.ModelSerializer):
                   'author_rating_sum',
                   'author_rating_count',
                   'doer_rating_sum',
-                  'doer_rating_count',)
+                  'doer_rating_count',
+                  'my_tasks_amount',
+                  'todo_tasks_amount',
+                  'my_applications_amount',
+                  )
         model = User
+
+    def get_my_tasks_amount(self, user):
+        return Task.objects.filter(author=user).count()
+
+    def get_todo_tasks_amount(self, user):
+        return Task.objects.filter(doer=user).count()
+
+    def get_my_applications_amount(self, user):
+        return Application.objects.filter(applicant=user).count()
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
