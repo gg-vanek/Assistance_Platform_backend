@@ -58,7 +58,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     def get_my_applications_amount(self, user):
         all_applications = Application.objects.filter(applicant=user)
-        return [all_applications.filter(status='S'), all_applications.count()]
+        return [all_applications.filter(status='S').count(), all_applications.count()]
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
