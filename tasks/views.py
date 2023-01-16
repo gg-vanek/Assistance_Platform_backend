@@ -5,7 +5,7 @@ from rest_framework.exceptions import PermissionDenied
 from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES, Review
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
     ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, \
-    SetTaskImplementerSerializer, ReviewDetailSerializer, CloseTaskSerializer
+    SetTaskImplementerSerializer, ReviewSerializer, CloseTaskSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
@@ -352,7 +352,7 @@ class SetTaskImplementer(generics.RetrieveUpdateAPIView):
 # работа с отзывами
 class CreateReview(generics.CreateAPIView):
     permission_classes = (IsTaskImplementerOrTaskOwner,)
-    serializer_class = ReviewDetailSerializer
+    serializer_class = ReviewSerializer
 
     def create(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.parser_context['kwargs']['pk'])
@@ -413,7 +413,7 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     # при GET запросе возвращается список заявок
     # при пост запросе необходимо в теле запроса передать implementer=userID и он установится как исполнитель
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = ReviewDetailSerializer
+    serializer_class = ReviewSerializer
 
     def get_object(self):
         task = Task.objects.get(id=self.request.parser_context['kwargs']['pk'])
@@ -466,3 +466,26 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
             author.author_review_counter += counter_delta
             author.save()
             author.update_author_rating()
+
+
+class ReviewList(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        userid = self.request.parser_context['kwargs'].get('userid', None)
+        username = self.request.parser_context['kwargs'].get('username', None)
+
+        if userid is not None:
+            queryset = Review.objects.filter(reviewer__id=userid)
+        elif username is not None:
+            queryset = Review.objects.filter(reviewer__username=username)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        worst = self.request.query_params.get('worst', 0)
+        best = self.request.query_params.get('best', 10)
+
+        queryset = queryset.filter(rating__lte=best, rating__gte=worst)
+
+        return queryset

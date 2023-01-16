@@ -96,7 +96,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
     def get_reviews(self, task):
         reviews = Review.objects.filter(task=task)
-        return [ReviewDetailSerializer(review).data for review in reviews]
+        return [ReviewSerializer(review).data for review in reviews]
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
@@ -127,7 +127,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
         model = Application
 
 
-class ReviewDetailSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     reviewer = serializers.CharField(read_only=True)
     task = serializers.CharField(read_only=True)
     review_type = serializers.CharField(read_only=True)
@@ -151,6 +151,7 @@ class TaskApplySerializer(serializers.ModelSerializer):
 class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('title',
+                  'price',
                   'difficulty_stage_of_study',
                   'difficulty_course_of_study',
                   'tags',
