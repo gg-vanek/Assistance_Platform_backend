@@ -355,7 +355,6 @@ class CreateReview(generics.CreateAPIView):
     serializer_class = ReviewDetailSerializer
 
     def create(self, request, *args, **kwargs):
-        req_data = request.data.copy()
         task = Task.objects.get(pk=request.parser_context['kwargs']['pk'])
         if task.status != 'C':
             return Response({'detail': f"Создатель задачи еще не закрыл ее. Вы не можете оставить отзыв"},
@@ -366,26 +365,30 @@ class CreateReview(generics.CreateAPIView):
         elif Review.objects.filter(task=task, reviewer=request.user):
             return Response({'detail': f"Вы уже оставляли отзыв на эту задачу. Вы можете отредактировать старый"},
                             status=status.HTTP_400_BAD_REQUEST)
-        req_data['reviewer'] = request.user.id
-        req_data['task'] = task.id
+        data = {}
+        data['reviewer'] = request.user
+        data['task'] = task
         if task.author == request.user:
-            req_data['review_type'] = 'A'
+            data['review_type'] = 'A'
         elif task.implementer == request.user:
-            req_data['review_type'] = 'I'
+            data['review_type'] = 'I'
         else:
             # если не исполнитель и не создатель, то че за нах
             return Response({'detail': f"Похоже вы не можете оставить отзыв на эту задачу"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = self.get_serializer(data=req_data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        self.perform_create(serializer)
+        self.perform_create(serializer, data)
         # если ошибок не выскочило, то нужно пересчитать рейтинг пользователя которому поставили отзыв
-        self.update_rating(task=task, rating=req_data['rating'], review_type=req_data['review_type'])
+        self.update_rating(task=task, rating=request.data['rating'], review_type=data['review_type'])
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer, data={}):
+        serializer.save(**data)
 
     def update_rating(self, task, rating, review_type):
         rating = int(rating)

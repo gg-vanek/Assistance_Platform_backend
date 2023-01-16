@@ -128,6 +128,10 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
 
 
 class ReviewDetailSerializer(serializers.ModelSerializer):
+    reviewer = serializers.CharField(read_only=True)
+    task = serializers.CharField(read_only=True)
+    review_type = serializers.CharField(read_only=True)
+
     class Meta:
         fields = ('reviewer',
                   'task',
