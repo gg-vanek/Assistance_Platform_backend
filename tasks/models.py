@@ -25,7 +25,7 @@ class TaskSubject(models.Model):
 
 class Task(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='author')
-    doer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='doer')
+    implementer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='implementer')
     title = models.CharField(max_length=255)
     price = models.IntegerField(default=None, null=True)
 
@@ -53,13 +53,8 @@ class Task(models.Model):
                              'expires_at': 'Дедлайн по задаче',
                              'closed_at': 'Дата закрытия задачи'}  # последнее поле - задача уже выполнена
 
-    author_rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], blank=True, null=True)
-    review_on_author = models.TextField(blank=True)
-    doer_rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], blank=True, null=True)
-    review_on_doer = models.TextField(blank=True)
-
     def __str__(self):
-        return self.title
+        return str(self.id)
 
     def admin_list_applicants(self):
         # только для использоавния в админке
@@ -92,3 +87,16 @@ class TaskFile(models.Model):
 
     def __str__(self):
         return self.filename
+
+
+class Review(models.Model):
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='reviews')
+
+    review_type = models.CharField(max_length=1, choices=[('A', 'as author'), ('I', 'as implementer')])
+
+    message = models.TextField(blank=True)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+
+    class Meta:
+        unique_together = ('reviewer', 'task')

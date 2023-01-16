@@ -1,21 +1,21 @@
 from django.contrib import admin
-from .models import Task, TaskTag, TaskSubject, TaskFile, Application
+from .models import Task, TaskTag, TaskSubject, TaskFile, Application, Review
 
 
 class TaskAdmin(admin.ModelAdmin):
     model = Task
-    list_display = ('id', 'author', 'doer', 'admin_list_applicants', 'title',
+    list_display = ('id', 'author', 'implementer', 'admin_list_applicants', 'title',
                     'difficulty_stage_of_study', 'difficulty_course_of_study',
                     'admin_list_tags', 'subject', 'description', 'status',
                     'created_at', 'stop_accepting_applications_at', 'expires_at')
 
     fieldsets = (
         ('Task short info', {'fields': ('title', 'price')}),
-        ('Author and Doer', {'fields': ('author', 'doer',)}),
+        ('Author and implementer', {'fields': ('author', 'implementer',)}),
         ('Task info', {'fields': ('description', 'subject', 'tags', 'status',)}),
         ('Difficulty', {'fields': ('difficulty_stage_of_study', 'difficulty_course_of_study',)}),
         ("Dates", {"fields": ('stop_accepting_applications_at', 'expires_at',)}),
-        ("Ratings", {"fields": ('author_rating', 'review_on_author', 'doer_rating', 'review_on_doer',)}))
+        ("Ratings", {"fields": ('author_rating', 'review_on_author', 'implementer_rating', 'review_on_implementer',)}))
 
 
 class TaskTagAdmin(admin.ModelAdmin):
@@ -44,9 +44,19 @@ class ApplicationAdmin(admin.ModelAdmin):
     exclude = ('id',)
 
 
+class ReviewAdmin(admin.ModelAdmin):
+    model = Review
+    list_display = ('reviewer',
+                    'task',
+                    'review_type',
+                    'message',
+                    'rating')
+
+
 # Register your models here.
 admin.site.register(Task, TaskAdmin)
 admin.site.register(TaskTag, TaskTagAdmin)
 admin.site.register(TaskSubject, TaskSubjectAdmin)
 admin.site.register(TaskFile, TaskFileAdmin)
 admin.site.register(Application, ApplicationAdmin)
+admin.site.register(Review, ReviewAdmin)

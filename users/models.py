@@ -44,9 +44,10 @@ class User(AbstractUser):
     )
     email = models.EmailField(gettext_lazy("email address"), blank=True, unique=True)
 
-    biography = models.TextField(blank=True)
+    # информация о профиле пользователя
+    biography = models.TextField(null=True, default=None, blank=True)
 
-    profile_image = models.ImageField(null=True, blank=True,
+    profile_image = models.ImageField(null=True, default=None, blank=True,
                                       upload_to=os.path.join(settings.MEDIA_ROOT,
                                                              f'users/user_profile_images'))
 
@@ -55,15 +56,33 @@ class User(AbstractUser):
         MinValueValidator(1),
         MaxValueValidator(15),
     ])
-    contact_phone = models.CharField(max_length=30, null=True, default=None, blank=True)
-    contact_email = models.EmailField(null=True, default=None, blank=True)
-    contact_tg = models.CharField(max_length=40, null=True, default=None, blank=True)
-    contact_vk = models.CharField(max_length=40, null=True, default=None, blank=True)
+    # контактная информация
+    phone = models.CharField(max_length=30, null=True, default=None, blank=True)
+    telegram = models.CharField(max_length=40, null=True, default=None, blank=True)
+    vk = models.CharField(max_length=40, null=True, default=None, blank=True)
 
-    author_rating_sum = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    author_rating_count = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    doer_rating_sum = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    doer_rating_count = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    # статистическая информация о пользователе
+    author_rating = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    author_review_counter = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    author_rating_normalized = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+
+    implementer_rating = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    implementer_review_counter = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    implementer_rating_normalized = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
     def __str__(self):
         return self.username
+
+    def update_author_rating(self):
+        if self.author_review_counter == 0:
+            pass
+        else:
+            self.author_rating_normalized = self.author_rating / self.author_review_counter
+            self.save()
+
+    def update_implementer_rating(self):
+        if self.implementer_review_counter == 0:
+            pass
+        else:
+            self.implementer_rating_normalized = self.implementer_rating / self.implementer_review_counter
+            self.save()

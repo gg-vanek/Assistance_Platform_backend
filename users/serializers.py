@@ -4,6 +4,58 @@ from tasks.models import Task, Application
 from .models import User
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = (
+            'first_name',
+            'last_name',
+            'biography',
+            'profile_image',
+            'stage_of_study',
+            'course_of_study',
+        )
+        model = User
+
+
+class UserContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = (
+            'first_name',
+            'email',
+            'phone',
+            'telegram',
+            'vk',
+        )
+        model = User
+
+
+class UserStatisticsSerializer(serializers.ModelSerializer):
+    ratings = serializers.SerializerMethodField(read_only=True)
+    tasks = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        fields = ('ratings', 'tasks')
+        model = User
+
+    def get_ratings(self, user):
+        return {'author': {'sum': user.author_rating, 'amount': user.author_review_counter,
+                           'normalized': user.author_rating_normalized},
+                'implementer': {'sum': user.implementer_rating, 'amount': user.implementer_review_counter,
+                                'normalized': user.implementer_rating_normalized}}
+
+    def get_tasks(self, user):
+        authored_tasks = Task.objects.filter(author=user)
+        implementered_tasks = Task.objects.filter(implementer=user)
+        applications = Application.objects.filter(applicant=user)
+
+        return {'authored': {'active': authored_tasks.filter(status__in=['A', 'P']).count(),
+                             'total': authored_tasks.count()},
+                'implementered': {'active': implementered_tasks.filter(status='P').count(),
+                                  'total': implementered_tasks.count()},
+                'applications': {'active': applications.filter(status='S').count(),
+                                 'total': applications.count()}}
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id',
@@ -15,50 +67,27 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-    author_rating_sum = serializers.IntegerField(read_only=True)
-    author_rating_count = serializers.IntegerField(read_only=True)
-    doer_rating_sum = serializers.IntegerField(read_only=True)
-    doer_rating_count = serializers.IntegerField(read_only=True)
-
-    my_tasks_amount = serializers.SerializerMethodField(read_only=True)
-    todo_tasks_amount = serializers.SerializerMethodField(read_only=True)
-    my_applications_amount = serializers.SerializerMethodField(read_only=True)
+    statistics = serializers.SerializerMethodField(read_only=True)
+    contact = serializers.SerializerMethodField(read_only=True)
+    profile = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         fields = ('id',
                   'username',
-                  'first_name',
-                  'last_name',
                   'email',
-                  'profile_image',
-                  'biography',
-                  'stage_of_study',
-                  'course_of_study',
-                  'contact_phone',
-                  'contact_email',
-                  'contact_tg',
-                  'contact_vk',
-                  'author_rating_sum',
-                  'author_rating_count',
-                  'doer_rating_sum',
-                  'doer_rating_count',
-                  'my_tasks_amount',
-                  'todo_tasks_amount',
-                  'my_applications_amount',
-                  )
+                  'profile',
+                  'contact',
+                  'statistics')
         model = User
 
-    def get_my_tasks_amount(self, user):
-        all_tasks = Task.objects.filter(author=user)
-        return [all_tasks.filter(status__in=['A', 'P']).count(), all_tasks.count()]
+    def get_statistics(self, user):
+        return UserStatisticsSerializer(user).data
 
-    def get_todo_tasks_amount(self, user):
-        all_tasks = Task.objects.filter(doer=user)
-        return [all_tasks.filter(status='P').count(), all_tasks.count()]
+    def get_contact(self, user):
+        return UserContactSerializer(user).data
 
-    def get_my_applications_amount(self, user):
-        all_applications = Application.objects.filter(applicant=user)
-        return [all_applications.filter(status='S').count(), all_applications.count()]
+    def get_profile(self, user):
+        return UserProfileSerializer(user).data
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -71,17 +100,5 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
 
     def create(self, validated_data):
+        # TODO добавить подтверждение по email
         return User.objects.create_user(**validated_data)
-
-
-class UserContactSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = ('id',
-                  'username',
-                  'first_name',
-                  'last_name',
-                  'contact_phone',
-                  'contact_email',
-                  'contact_tg',
-                  'contact_vk',)
-        model = User

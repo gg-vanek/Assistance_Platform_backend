@@ -2,15 +2,15 @@ from rest_framework import generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
 
-from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES
+from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES, Review
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
     ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, \
-    SetTaskDoerSerializer, ReviewOnTaskDetailSerializer
+    SetTaskImplementerSerializer, ReviewDetailSerializer, CloseTaskSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
 import datetime
-from .permissions import IsTaskOwnerOrReadOnly
+from .permissions import IsTaskOwnerOrReadOnly, IsTaskImplementerOrTaskOwner
 
 from users.models import STAGE_OF_STUDY_CHOICES
 
@@ -20,12 +20,12 @@ def filter_for_person(queryset, request):
     kwarg_key = list(kwarg.keys())[0]
     if kwarg_key == 'authorid':
         queryset = queryset.filter(author__id=kwarg[kwarg_key])
-    elif kwarg_key == 'doerid':
-        queryset = queryset.filter(doer__id=kwarg[kwarg_key])
+    elif kwarg_key == 'implementerid':
+        queryset = queryset.filter(implementer__id=kwarg[kwarg_key])
     elif kwarg_key == 'authorusername':
         queryset = queryset.filter(author__username=kwarg[kwarg_key])
-    elif kwarg_key == 'doerusername':
-        queryset = queryset.filter(doer__username=kwarg[kwarg_key])
+    elif kwarg_key == 'implementerusername':
+        queryset = queryset.filter(implementer__username=kwarg[kwarg_key])
     else:
         pass
     return queryset
@@ -96,6 +96,8 @@ def search_in_tasks(queryset, search_query):
 # первая обозначает, что параметры фильтрации передаются в url_parameters
 # вторая обозначает, что параметры фильтрации передаются в теле запроса
 filters_location_in_request_object = 'query_params'
+
+
 # filters_location_in_request_object = 'data'
 
 
@@ -124,8 +126,9 @@ def informational_endpoint_view(request):
     # TODO добавить сортировку по рейтингу автора задачи
     sort_fields = [field.name for field in Task._meta.get_fields()]
 
-    not_for_sort_fields = ["id", "applications", "files", "difficulty_stage_of_study", "author", "doer", "description",
-                           "author_rating", "review_on_author", "doer_rating", "review_on_doer", "tags"]
+    not_for_sort_fields = ["id", "applications", "files", "difficulty_stage_of_study", "author", "implementer",
+                           "description",
+                           "author_rating", "review_on_author", "implementer_rating", "review_on_implementer", "tags"]
 
     for field in not_for_sort_fields:
         if field in sort_fields:
@@ -258,6 +261,12 @@ class CreateTask(generics.CreateAPIView):
         serializer.save(**data)
 
 
+class CloseTask(generics.UpdateAPIView):
+    permission_classes = (permissions.IsAuthenticated, IsTaskOwnerOrReadOnly)
+    serializer_class = CloseTaskSerializer
+    queryset = Task.objects.all()
+
+
 # эндпоинты для работы с заявками
 class ApplicationsList(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -318,7 +327,7 @@ class TaskApply(generics.CreateAPIView):
         if task.status != 'A':
             return Response({'detail': f"Статус задачи {task.status}. Отправка заявок на нее недоступна"},
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        if any([application.applicant == request.user for application in task.applications.all()]):
+        if Application.objects.filter(applicant=request.user, task=task):
             # если уже была такая заявка на это задание то ничего не меняем
             return Response({'detail': "Ваша заявка уже отправлена вы не можете добавить новую,"
                                        " но можете отредактировать старую"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -332,19 +341,122 @@ class TaskApply(generics.CreateAPIView):
         return serializer.save(**data)
 
 
-class SetTaskDoer(generics.RetrieveUpdateAPIView):
+class SetTaskImplementer(generics.RetrieveUpdateAPIView):
     # при GET запросе возвращается список заявок
-    # при пост запросе необходимо в теле запроса передать doer=userID и он установится как исполнитель
-    permission_classes = (permissions.IsAuthenticated, IsTaskOwnerOrReadOnly,)
-    serializer_class = SetTaskDoerSerializer
+    # при пост запросе необходимо в теле запроса передать implementer=userID и он установится как исполнитель
+    permission_classes = (IsTaskOwnerOrReadOnly,)
+    serializer_class = SetTaskImplementerSerializer
     queryset = Task.objects.all()
 
 
 # работа с отзывами
-class ReviewOnTask(generics.RetrieveUpdateAPIView):
-    # TODO create
+class CreateReview(generics.CreateAPIView):
+    permission_classes = (IsTaskImplementerOrTaskOwner,)
+    serializer_class = ReviewDetailSerializer
+
+    def create(self, request, *args, **kwargs):
+        req_data = request.data.copy()
+        task = Task.objects.get(pk=request.parser_context['kwargs']['pk'])
+        if task.status != 'C':
+            return Response({'detail': f"Создатель задачи еще не закрыл ее. Вы не можете оставить отзыв"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if Review.objects.filter(task=task, reviewer=request.user):
+            return Response({'detail': f"Вы уже оставляли отзыв на эту задачу. Вы можете отредактировать старый"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        req_data['reviewer'] = request.user.id
+        req_data['task'] = task.id
+        if task.author == request.user:
+            req_data['review_type'] = 'A'
+        elif task.implementer == request.user:
+            req_data['review_type'] = 'I'
+        else:
+            # если не исполнитель и не создатель, то че за нах
+            return Response({'detail': f"Похоже вы не можете оставить отзыв на эту задачу"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(data=req_data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+        # если ошибок не выскочило, то нужно пересчитать рейтинг пользователя которому поставили отзыв
+        self.update_rating(task=task, rating=req_data['rating'], review_type=req_data['review_type'])
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update_rating(self, task, rating, review_type):
+        if review_type == 'A':
+            # если ревью от автора то пересчитываем исполнителя
+            implementer = task.implementer
+            implementer.implementer_rating += rating
+            implementer.implementer_review_counter += 1
+            implementer.save()
+            implementer.update_implementer_rating()
+
+        if review_type == 'I':
+            # если ревью от исполнителя то пересчитываем автора
+            author = task.author
+            author.author_rating += rating
+            author.author_review_counter += 1
+            author.save()
+            author.update_author_rating()
+
+
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     # при GET запросе возвращается список заявок
-    # при пост запросе необходимо в теле запроса передать doer=userID и он установится как исполнитель
+    # при пост запросе необходимо в теле запроса передать implementer=userID и он установится как исполнитель
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = ReviewOnTaskDetailSerializer
-    queryset = Task.objects.all()
+    serializer_class = ReviewDetailSerializer
+
+    def get_object(self):
+        task = Task.objects.get(id=self.request.parser_context['kwargs']['pk'])
+        return Review.objects.get(task=task, user=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        review = self.get_object()
+
+        task = Task.objects.get(pk=request.parser_context['kwargs']['pk'])
+        old_rating = review.rating
+        new_rating = request.data['rating']
+
+        serializer = self.get_serializer(review, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        self.update_rating(task=task, review_type=review.review_type,
+                           rating_delta=new_rating - old_rating,
+                           counter_delta=0)
+
+        if getattr(review, '_prefetched_objects_cache', None):
+            review._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        task = Task.objects.get(pk=request.parser_context['kwargs']['pk'])
+
+        review = self.get_object()
+        self.perform_destroy(review)
+        self.update_rating(task=task, review_type=review.review_type,
+                           rating_delta=-review.rating,
+                           counter_delta=-1)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def update_rating(self, task, review_type, rating_delta, counter_delta):
+        if review_type == 'A':
+            # если ревью от автора то пересчитываем исполнителя
+            implementer = task.implementer
+            implementer.implementer_rating += rating_delta
+            implementer.implementer_review_counter += counter_delta
+            implementer.save()
+            implementer.update_implementer_rating()
+
+        if review_type == 'I':
+            # если ревью от исполнителя то пересчитываем автора
+            author = task.author
+            author.author_rating += rating_delta
+            author.author_review_counter += counter_delta
+            author.save()
+            author.update_author_rating()

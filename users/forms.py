@@ -14,10 +14,9 @@ class UserCreationForm(DefaultUserCreationForm):
                   'biography',
                   'stage_of_study',
                   'course_of_study',
-                  'contact_phone',
-                  'contact_email',
-                  'contact_tg',
-                  'contact_vk',)
+                  'phone',
+                  'telegram',
+                  'vk',)
 
 
 class UserChangeForm(DefaultUserChangeForm):
@@ -31,8 +30,7 @@ class UserChangeForm(DefaultUserChangeForm):
                   'biography',
                   'stage_of_study',
                   'course_of_study',
-                  'contact_phone',
-                  'contact_email',
-                  'contact_tg',
-                  'contact_vk',)
+                  'phone',
+                  'telegram',
+                  'vk',)
 

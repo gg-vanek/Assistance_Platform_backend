@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from users.models import User
 from users.serializers import UserContactSerializer
-from .models import Task, Application, TaskTag, TaskSubject
+from .models import Task, Application, TaskTag, TaskSubject, Review
 
 
 # informational serializers
@@ -27,7 +27,7 @@ class TaskSerializer(serializers.ModelSerializer):
                   'title',
                   'price',
                   'author',
-                  'doer',
+                  'implementer',
                   'applicants',
                   'difficulty_stage_of_study',
                   'difficulty_course_of_study',
@@ -49,19 +49,20 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class TaskDetailSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', read_only=True)
-    doer = serializers.CharField(source='doer.username', read_only=True)
+    implementer = serializers.CharField(source='implementer.username', read_only=True)
     applicants = serializers.SerializerMethodField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
     expires_at = serializers.DateTimeField()
 
-    author_contacts = serializers.SerializerMethodField(read_only=True)
-    doer_contacts = serializers.SerializerMethodField(read_only=True)
+    contacts = serializers.SerializerMethodField(read_only=True)
 
+    status = serializers.CharField(read_only=True)
+    reviews = serializers.SerializerMethodField(read_only=True)
     class Meta:
         fields = ('id',
                   'author',
-                  'doer',
+                  'implementer',
                   'applicants',
                   'title',
                   'price',
@@ -72,66 +73,30 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'description',
                   'stop_accepting_applications_at',
                   'status',
+                  'contacts',
+                  'reviews',
                   'created_at',
                   'updated_at',
-                  'expires_at',
-                  'author_contacts',
-                  'doer_contacts',
-                  'author_rating',
-                  'review_on_author',
-                  'doer_rating',
-                  'review_on_doer')
+                  'expires_at',)
         model = Task
-
-    def validate_status(self, new_status):
-        task = self.instance
-        old_status = task.status
-        if old_status != new_status:
-            if old_status == 'A':
-                if new_status == 'P' and task.doer is None:  # нет автора => нельзя переключить из A в P
-                    raise serializers.ValidationError(
-                        "This task doesn't have doer. You cant set it's status to 'In progress'")
-                if new_status == 'C':
-                    pass  # всегда можно закрыть задание
-            if old_status == 'P':
-                if new_status == 'A' and task.doer is not None:  # нет автора => нельзя переключить из A в P
-                    raise serializers.ValidationError(
-                        "This task already have doer. You cant set it's status to 'Accepting applications'")
-                if new_status == 'C':
-                    pass  # всегда можно закрыть задание
-            if old_status == 'C':
-                if new_status == 'P':
-                    if task.doer is None:
-                        raise serializers.ValidationError(
-                            "This task doesn't have doer. You cant set it's status to 'In progress'")
-                    elif task.author_rating or task.doer_rating:
-                        raise serializers.ValidationError(
-                            "This task already have review. You cant set it's status to 'In progress'")
-                if new_status == 'A':
-                    if task.doer is not None:
-                        raise serializers.ValidationError(
-                            "This task already have doer. You cant set it's status to 'Accepting applications'")
-
-        return new_status
 
     def get_applicants(self, task):
         applications = task.applications.all()
         applicants = [application.applicant.username for application in applications]
         return applicants
 
-    def get_author_contacts(self, task):
+    def get_contacts(self, task):
         user = self.context['request'].user
-        if user == task.doer:
-            return UserContactSerializer(task.author).data
+        if user == task.implementer:
+            return {'author': UserContactSerializer(task.author).data}
+        elif user == task.author:
+            return {'implementer': UserContactSerializer(task.implementer).data}
         else:
             return None
 
-    def get_doer_contacts(self, task):
-        user = self.context['request'].user
-        if user == task.author:
-            return UserContactSerializer(task.doer).data
-        else:
-            return None
+    def get_reviews(self, task):
+        reviews = Review.objects.filter(task=task)
+        return [ReviewDetailSerializer(review).data for review in reviews]
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
@@ -162,6 +127,16 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
         model = Application
 
 
+class ReviewDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('reviewer',
+                  'task',
+                  'review_type',
+                  'message',
+                  'rating')
+        model = Review
+
+
 # task interact serializers
 class TaskApplySerializer(serializers.ModelSerializer):
     class Meta:
@@ -181,52 +156,52 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         model = Task
 
 
-class SetTaskDoerSerializer(serializers.ModelSerializer):
+class SetTaskImplementerSerializer(serializers.ModelSerializer):
     task = serializers.SerializerMethodField(read_only=True)
     applications = serializers.SerializerMethodField(read_only=True)
-    doer = serializers.SerializerMethodField(method_name='set_doer')
+    implementer = serializers.SerializerMethodField(method_name='set_implementer')
 
     class Meta:
         fields = ('id',
-                  'doer',
+                  'implementer',
                   'task',
                   'applications',)
         model = Task
 
-    def set_doer(self, task):
-        doer_id = self.context['request'].data.get('doer')
-        if doer_id is None or self.context['request'].method != 'PUT':
-            if task.doer is not None:
-                return task.doer.id
-            return task.doer
+    def set_implementer(self, task):
+        implementer_username = self.context['request'].data.get('implementer')
+        if implementer_username is None or self.context['request'].method != 'PUT':
+            if task.implementer is not None:
+                return task.implementer.username
+            return task.implementer
 
-        # если еще нет doer; если accepting applications
-        if not (task.doer is None):
-            raise serializers.ValidationError(f'This task (id = {task.id}) already have doer')
+        # если еще нет implementer; если accepting applications
+        if not (task.implementer is None):
+            raise serializers.ValidationError(f'This task (id = {task.id}) already have implementer')
         if not (task.status == 'A'):
             raise serializers.ValidationError(f'This task (id = {task.id}) status is {task.status}. '
                                               f'It is not Acception Applications')
-        if not (doer_id in [application.applicant.id for application in task.applications.all()]):
+        if not (implementer_username in [application.applicant.username for application in task.applications.all()]):
             raise serializers.ValidationError(
-                f'This user (id={doer_id}) haven\'t send application for this task (id={task.id})')
+                f'This user (id={implementer_username}) haven\'t send application for this task (id={task.id})')
 
         # если юзер у задания еще не задан,
         # если задание принимает заявки,
         # если юзер подавал заявку на исполнение, то
         # иными словами "если все норм"
         task.status = 'P'  # задание переходит в режим IN PROGRESS
-        task.doer = User.objects.get(id=doer_id)  # задать юзера как исполнителя
+        task.implementer = User.objects.get(username=implementer_username)  # задать юзера как исполнителя
         task.save()
 
         applications = task.applications.all()
         for application in applications:
-            if application.applicant.id == doer_id:
+            if application.applicant.username == implementer_username:
                 application.status = 'A'  # статус ACCEPTED
             else:
                 application.status = 'R'  # статус REJECTED
             application.save()
 
-        return doer_id
+        return implementer_username
 
     def get_applications(self, task):
         applications = task.applications.all()
@@ -234,17 +209,22 @@ class SetTaskDoerSerializer(serializers.ModelSerializer):
         return applications_info
 
     def get_task(self, task):
-        return TaskDetailSerializer(task, context=self.context)
+        return TaskDetailSerializer(task, context=self.context).data
 
 
-class ReviewOnTaskDetailSerializer(serializers.ModelSerializer):
-    # выдает всю инфу о задании в рид онли.
-    # принимает 2 поля рейтинг и отзыв, но они доступны только для создателя задачи и исполнителя.
-    # в зависимости от того, кто сделал запрос заносить ре
+class CloseTaskSerializer(serializers.ModelSerializer):
+    confirm = serializers.CharField(max_length=300, write_only=True)
+
     class Meta:
-        fields = ('id',
-                  'title',
-                  'doer',
-                  'status',
-                  'closed')
+        fields = ('confirm', )
         model = Task
+
+    def update(self, task, validated_data):
+        if task.status == 'C':
+            raise serializers.ValidationError(f'Задача уже была закрыта ранее')
+        elif validated_data['confirm'] == 'Я подтверждаю, что хочу закрыть задачу':
+            task.status = 'C'
+            task.save()
+            return task
+        else:
+            raise serializers.ValidationError(f'Задача не была закрыта')
