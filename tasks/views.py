@@ -360,10 +360,12 @@ class CreateReview(generics.CreateAPIView):
         if task.status != 'C':
             return Response({'detail': f"Создатель задачи еще не закрыл ее. Вы не можете оставить отзыв"},
                             status=status.HTTP_400_BAD_REQUEST)
-        if Review.objects.filter(task=task, reviewer=request.user):
+        elif not task.implementer:
+            return Response({'detail': f"На эту задачу так и не был назначен исполнитель. На нее нельзя оставлять отзывы"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        elif Review.objects.filter(task=task, reviewer=request.user):
             return Response({'detail': f"Вы уже оставляли отзыв на эту задачу. Вы можете отредактировать старый"},
                             status=status.HTTP_400_BAD_REQUEST)
-
         req_data['reviewer'] = request.user.id
         req_data['task'] = task.id
         if task.author == request.user:
@@ -386,6 +388,7 @@ class CreateReview(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update_rating(self, task, rating, review_type):
+        rating = int(rating)
         if review_type == 'A':
             # если ревью от автора то пересчитываем исполнителя
             implementer = task.implementer
@@ -411,7 +414,7 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         task = Task.objects.get(id=self.request.parser_context['kwargs']['pk'])
-        return Review.objects.get(task=task, user=self.request.user)
+        return Review.objects.get(task=task, reviewer=self.request.user)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -426,7 +429,7 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
         self.perform_update(serializer)
 
         self.update_rating(task=task, review_type=review.review_type,
-                           rating_delta=new_rating - old_rating,
+                           rating_delta=int(new_rating) - old_rating,
                            counter_delta=0)
 
         if getattr(review, '_prefetched_objects_cache', None):

@@ -14,8 +14,7 @@ class TaskAdmin(admin.ModelAdmin):
         ('Author and implementer', {'fields': ('author', 'implementer',)}),
         ('Task info', {'fields': ('description', 'subject', 'tags', 'status',)}),
         ('Difficulty', {'fields': ('difficulty_stage_of_study', 'difficulty_course_of_study',)}),
-        ("Dates", {"fields": ('stop_accepting_applications_at', 'expires_at',)}),
-        ("Ratings", {"fields": ('author_rating', 'review_on_author', 'implementer_rating', 'review_on_implementer',)}))
+        ("Dates", {"fields": ('stop_accepting_applications_at', 'expires_at',)}),)
 
 
 class TaskTagAdmin(admin.ModelAdmin):

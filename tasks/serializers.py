@@ -176,6 +176,7 @@ class SetTaskImplementerSerializer(serializers.ModelSerializer):
             return task.implementer
 
         # если еще нет implementer; если accepting applications
+        print(task.implementer)
         if not (task.implementer is None):
             raise serializers.ValidationError(f'This task (id = {task.id}) already have implementer')
         if not (task.status == 'A'):
