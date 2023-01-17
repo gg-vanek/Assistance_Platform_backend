@@ -19,4 +19,6 @@ class Notification(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        # при переходе из статуса checked - в unchecked тоже сюда заходит
+        # нельзя просто отправлять письмо на email
         print('-------------------------Создалось уведомление------------------------')

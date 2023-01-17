@@ -18,5 +18,9 @@ class NotificationList(generics.ListAPIView):
         else:
             pass
 
+        for notification in queryset:
+            notification.checked = True
+            notification.save()
+
         return queryset
 
