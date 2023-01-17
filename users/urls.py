@@ -1,7 +1,7 @@
 from django.urls import path
 
 from tasks.views import TaskList, ApplicationsList, ReviewList
-from .views import UserList, UserDetail, UserRegistration, CurrentUserDetail
+from .views import UserList, UserDetail, UserRegistration
 
 urlpatterns = [
     path('registration', UserRegistration.as_view()),  # TODO пока сырой вариант регистрации
