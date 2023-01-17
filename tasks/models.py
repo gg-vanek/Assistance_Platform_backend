@@ -1,6 +1,8 @@
 import datetime
 
 from django.db import models
+from django.utils import timezone
+
 from users.models import User, STAGE_OF_STUDY_CHOICES
 from django.conf import settings
 import os
@@ -97,6 +99,9 @@ class Review(models.Model):
 
     message = models.TextField(blank=True)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('reviewer', 'task')

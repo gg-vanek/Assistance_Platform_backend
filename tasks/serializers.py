@@ -62,6 +62,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
     status = serializers.CharField(read_only=True)
     reviews = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         fields = ('id',
                   'author',
@@ -107,7 +108,8 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
 class ApplicationSerializer(serializers.ModelSerializer):
     applicant_username = serializers.SerializerMethodField(read_only=True)
-    implementer_rating_normalized = serializers.FloatField(source='applicant.implementer_rating_normalized', read_only=True)
+    implementer_rating_normalized = serializers.FloatField(source='applicant.implementer_rating_normalized',
+                                                           read_only=True)
 
     class Meta:
         fields = ('applicant',
@@ -126,13 +128,15 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 class ApplicationDetailSerializer(serializers.ModelSerializer):
     applicant = serializers.CharField(source='applicant.username', read_only=True)
-    implementer_rating_normalized = serializers.FloatField(source='applicant.implementer_rating_normalized', read_only=True)
+    implementer_rating_normalized = serializers.FloatField(source='applicant.implementer_rating_normalized',
+                                                           read_only=True)
     task = serializers.CharField(source='task.id', read_only=True)
     created_at = serializers.CharField(read_only=True)
     updated_at = serializers.CharField(read_only=True)
 
     class Meta:
-        fields = ('id', 'applicant', 'implementer_rating_normalized', 'task', 'status', 'message', 'created_at', 'updated_at',)
+        fields = (
+        'id', 'applicant', 'implementer_rating_normalized', 'task', 'status', 'message', 'created_at', 'updated_at',)
         model = Application
 
 
@@ -146,7 +150,10 @@ class ReviewSerializer(serializers.ModelSerializer):
                   'task',
                   'review_type',
                   'message',
-                  'rating')
+                  'rating',
+                  'created_at',
+                  'updated_at'
+                  )
         model = Review
 
 
@@ -231,7 +238,7 @@ class CloseTaskSerializer(serializers.ModelSerializer):
     confirm = serializers.CharField(max_length=300, write_only=True)
 
     class Meta:
-        fields = ('confirm', )
+        fields = ('confirm',)
         model = Task
 
     def update(self, task, validated_data):
