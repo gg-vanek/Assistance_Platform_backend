@@ -27,12 +27,14 @@ urlpatterns = [
     path('api/v1/users/', include('users.urls')),  # ссылка на другой файл urls.py
     # tasks app
     path('api/v1/tasks/', include('tasks.urls')),  # ссылка на другой файл urls.py
+    # notifications app
+    path('api/v1/notifications/', include('notifications.urls')),  # ссылка на другой файл urls.py
 
     # auth
-    path('api/v1/api-auth/', include('rest_framework.urls')),  # сюда тебе не надо, это для веб версии апи
-    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # получение токенов
-    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # обновление токенов по рефрешу
-    path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),  # верификация токена
+    path('api/v1/api-auth', include('rest_framework.urls')),  # сюда тебе не надо, это для веб версии апи
+    path('api/v1/token', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # получение токенов
+    path('api/v1/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),  # обновление токенов по рефрешу
+    path('api/v1/token/verify', TokenVerifyView.as_view(), name='token_verify'),  # верификация токена
     path('api/v1/informational_endpoint', informational_endpoint_view, name='informational_endpoint'),
     # информационный эндпоинт
 ]

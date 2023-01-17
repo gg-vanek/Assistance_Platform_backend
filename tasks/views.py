@@ -98,7 +98,9 @@ def search_in_tasks(queryset, search_query):
 # выбрать одну строчку из двух.
 # первая обозначает, что параметры фильтрации передаются в url_parameters
 # вторая обозначает, что параметры фильтрации передаются в теле запроса
+
 filters_location_in_request_object = 'query_params'
+# filters_location_in_request_object = 'data'
 
 
 
@@ -213,6 +215,8 @@ class TaskList(generics.ListAPIView):
             if sort.endswith('author_rating'):
                 sort = sort.replace('author_rating', 'author__author_rating_normalized')
             queryset = queryset.order_by(sort)
+        # distinct удаляет дубликаты заданий. В какой-то момент
+        # их изза разных запросов может добавиться несколько экземпляров
         return queryset.distinct()
 
     def list(self, request, *args, **kwargs):

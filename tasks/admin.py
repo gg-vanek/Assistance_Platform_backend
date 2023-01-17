@@ -49,6 +49,8 @@ class ReviewAdmin(admin.ModelAdmin):
                     'task',
                     'review_type',
                     'message',
+                    'created_at',
+                    'updated_at',
                     'rating')
 
 
