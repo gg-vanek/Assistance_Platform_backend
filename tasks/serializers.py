@@ -21,12 +21,14 @@ class SubjectInfoSerializer(serializers.ModelSerializer):
 # display/edit serializers
 class TaskSerializer(serializers.ModelSerializer):
     applicants = serializers.SerializerMethodField(read_only=True)
+    author_rating_normalized = serializers.FloatField(source='author.author_rating_normalized', read_only=True)
 
     class Meta:
         fields = ('id',
                   'title',
                   'price',
                   'author',
+                  'author_rating_normalized',
                   'implementer',
                   'applicants',
                   'difficulty_stage_of_study',
@@ -49,6 +51,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class TaskDetailSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', read_only=True)
+    author_rating_normalized = serializers.FloatField(source='author.author_rating_normalized', read_only=True)
     implementer = serializers.CharField(source='implementer.username', read_only=True)
     applicants = serializers.SerializerMethodField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
@@ -62,6 +65,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id',
                   'author',
+                  'author_rating_normalized',
                   'implementer',
                   'applicants',
                   'title',
@@ -81,13 +85,15 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         model = Task
 
     def get_applicants(self, task):
-        applications = task.applications.all()
+        applications = task.applications.all().order_by('-applicant__implementer_rating_normalized')
         applicants = [application.applicant.username for application in applications]
         return applicants
 
     def get_contacts(self, task):
         user = self.context['request'].user
-        if user == task.implementer:
+        if task.implementer is None:
+            return None
+        elif user == task.implementer:
             return {'author': UserContactSerializer(task.author).data}
         elif user == task.author:
             return {'implementer': UserContactSerializer(task.implementer).data}
@@ -101,10 +107,12 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
 class ApplicationSerializer(serializers.ModelSerializer):
     applicant_username = serializers.SerializerMethodField(read_only=True)
+    implementer_rating_normalized = serializers.FloatField(source='applicant.implementer_rating_normalized', read_only=True)
 
     class Meta:
         fields = ('applicant',
                   'applicant_username',
+                  'implementer_rating_normalized',
                   'message',
                   'task',
                   'status',
@@ -118,12 +126,13 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 class ApplicationDetailSerializer(serializers.ModelSerializer):
     applicant = serializers.CharField(source='applicant.username', read_only=True)
+    implementer_rating_normalized = serializers.FloatField(source='applicant.implementer_rating_normalized', read_only=True)
     task = serializers.CharField(source='task.id', read_only=True)
     created_at = serializers.CharField(read_only=True)
     updated_at = serializers.CharField(read_only=True)
 
     class Meta:
-        fields = ('id', 'applicant', 'task', 'status', 'message', 'created_at', 'updated_at',)
+        fields = ('id', 'applicant', 'implementer_rating_normalized', 'task', 'status', 'message', 'created_at', 'updated_at',)
         model = Application
 
 
@@ -210,7 +219,7 @@ class SetTaskImplementerSerializer(serializers.ModelSerializer):
         return implementer_username
 
     def get_applications(self, task):
-        applications = task.applications.all()
+        applications = task.applications.all().order_by('-applicant__implementer_rating_normalized')
         applications_info = [ApplicationSerializer(application).data for application in applications]
         return applications_info
 

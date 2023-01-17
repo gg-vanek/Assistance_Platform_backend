@@ -46,7 +46,8 @@ def filter_tasks_by_date(queryset, date_start, date_end, date_type):
 
 
 def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, difficulty_stage_of_study,
-                           difficulty_course_of_study_min, difficulty_course_of_study_max, subjects):
+                           difficulty_course_of_study_min, difficulty_course_of_study_max, subjects,
+                           author_rating_min, author_rating_max):
     if tags is not None:
         if isinstance(tags, str):
             tags = tags.split(',')
@@ -71,10 +72,12 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
 
     if difficulty_stage_of_study is not None:
         queryset = queryset.filter(difficulty_stage_of_study__in=difficulty_stage_of_study.split(','))
-    if difficulty_course_of_study_min is not None:
-        queryset = queryset.filter(difficulty_course_of_study__gte=difficulty_course_of_study_min)
-    if difficulty_course_of_study_max is not None:
-        queryset = queryset.filter(difficulty_course_of_study__lte=difficulty_course_of_study_max)
+    queryset = queryset.filter(difficulty_course_of_study__gte=difficulty_course_of_study_min)
+    queryset = queryset.filter(difficulty_course_of_study__lte=difficulty_course_of_study_max)
+
+    queryset = queryset.filter(author__author_rating_normalized__gte=author_rating_min)
+    queryset = queryset.filter(author__author_rating_normalized__lte=author_rating_max)
+
     if subjects is not None:
         # учитывая что у задания поле subject - единственное => выводим только через "or"
         if isinstance(subjects, str):
@@ -98,8 +101,6 @@ def search_in_tasks(queryset, search_query):
 filters_location_in_request_object = 'query_params'
 
 
-# filters_location_in_request_object = 'data'
-
 
 def get_filtering_by_fields_params(request):
     all_filters = getattr(request, filters_location_in_request_object)
@@ -107,9 +108,11 @@ def get_filtering_by_fields_params(request):
             'tags_grouping_type': all_filters.get('tags_grouping_type', 'or'),
             'task_status': all_filters.get('task_status', None),
             'difficulty_stage_of_study': all_filters.get('stage', None),
-            'difficulty_course_of_study_min': all_filters.get('course_min', None),
-            'difficulty_course_of_study_max': all_filters.get('course_max', None),
-            'subjects': all_filters.get('subjects', None)}
+            'difficulty_course_of_study_min': all_filters.get('course_min', 0),
+            'difficulty_course_of_study_max': all_filters.get('course_max', 15),
+            'subjects': all_filters.get('subjects', None),
+            'author_rating_min': all_filters.get('author_rating_min', 0),
+            'author_rating_max': all_filters.get('author_rating_max', 10)}
 
 
 def get_filtering_by_date_params(request):
@@ -127,9 +130,8 @@ def informational_endpoint_view(request):
     sort_fields = [field.name for field in Task._meta.get_fields()]
 
     not_for_sort_fields = ["id", "applications", "files", "difficulty_stage_of_study", "author", "implementer",
-                           "description",
-                           "author_rating", "review_on_author", "implementer_rating", "review_on_implementer", "tags"]
-
+                           "description", "tags", 'reviews']
+    print(sort_fields)
     for field in not_for_sort_fields:
         if field in sort_fields:
             sort_fields.remove(field)
@@ -143,7 +145,8 @@ def informational_endpoint_view(request):
                          'stop_accepting_applications_at': 'Дата планируемого окончания рпиема заявок',
                          'expires_at': 'Дата планируемого закрытия задачи',
                          'closed_at': 'Дата закрытия задачи',
-                         'price': 'Вознаграждение за решение'}
+                         'price': 'Вознаграждение за решение',
+                         'author_rating': 'Рейтинг автора задачи'}
 
     sort_fields_info = {}
     for sort_field in sort_fields:
@@ -161,7 +164,9 @@ def informational_endpoint_view(request):
                                                                   'stage': STAGE_OF_STUDY_CHOICES,
                                                                   'course_min': 0,
                                                                   'course_max': 15,
-                                                                  'subjects': None},
+                                                                  'subjects': None,
+                                                                  'author_rating_min': 0,
+                                                                  'author_rating_max': 10},
                                                'search_filter': 'search_query',
                                                'date_filters': {'date_start': None, 'date_end': None,
                                                                 'date_type': Task.datetime_fileds_names,
@@ -204,8 +209,9 @@ class TaskList(generics.ListAPIView):
             return response
 
         sort = self.request.query_params.get('sort')
-
         if sort is not None and sort != '-':
+            if sort.endswith('author_rating'):
+                sort = sort.replace('author_rating', 'author__author_rating_normalized')
             queryset = queryset.order_by(sort)
         return queryset.distinct()
 
@@ -287,6 +293,9 @@ class ApplicationsList(generics.ListAPIView):
         if application_status is not None and not isinstance(queryset, list):
             application_status = application_status.split(',')
             queryset = queryset.filter(status__in=application_status)
+
+        # отсортировать заявки по "рейтингу исполнителя" среди подавших заявки
+        queryset = queryset.order_by('-applicant__implementer_rating_normalized')
 
         return queryset
 
