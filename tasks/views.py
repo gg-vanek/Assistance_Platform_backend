@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
-
+from django.db.models import Q
 from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES, Review
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
     ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, \
@@ -482,13 +482,31 @@ class ReviewList(generics.ListAPIView):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        userid = self.request.parser_context['kwargs'].get('userid', None)
-        username = self.request.parser_context['kwargs'].get('username', None)
+        reviewerid = self.request.parser_context['kwargs'].get('reviewerid', None)
+        reviewerusername = self.request.parser_context['kwargs'].get('reviewerusername', None)
 
-        if userid is not None:
-            queryset = Review.objects.filter(reviewer__id=userid)
-        elif username is not None:
-            queryset = Review.objects.filter(reviewer__username=username)
+        reviewreceiverid = self.request.parser_context['kwargs'].get('reviewreceiverid', None)
+        reviewreceiverusername = self.request.parser_context['kwargs'].get('reviewreceiverusername', None)
+
+        if reviewerid is not None:
+            queryset = Review.objects.filter(reviewer__id=reviewerid)
+        elif reviewerusername is not None:
+            queryset = Review.objects.filter(reviewer__username=reviewerusername)
+
+        elif reviewreceiverid is not None:
+            # берем те отзывы, которые ссылаются на те задания, к которым юзер имеет отношение (автор/исполнитель)
+            # но при этом откидываем из них те, которые оставил сам юзер
+            # на выходе получаем только отзывы оставленные на этого юзера
+            queryset = Review.objects.filter((Q(task__implementer__id=reviewreceiverid) |
+                                              Q(task__author__id=reviewreceiverid)) &
+                                             ~Q(reviewer__id=reviewreceiverid))
+        elif reviewerusername is not None:
+            # берем те отзывы, которые ссылаются на те задания, к которым юзер имеет отношение (автор/исполнитель)
+            # но при этом откидываем из них те, которые оставил сам юзер
+            # на выходе получаем только отзывы оставленные на этого юзера
+            queryset = Review.objects.filter((Q(task__implementer__username=reviewerusername) |
+                                              Q(task__author__username=reviewerusername)) &
+                                             ~Q(reviewer__username=reviewerusername))
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
