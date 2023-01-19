@@ -12,7 +12,7 @@ from rest_framework import status
 import datetime
 from .permissions import IsTaskOwnerOrReadOnly, IsTaskImplementerOrTaskOwner
 
-from users.models import STAGE_OF_STUDY_CHOICES
+from users.models import STAGE_OF_STUDY_CHOICES, User
 
 
 def filter_for_person(queryset, request):
@@ -55,7 +55,10 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
             tags = [tags]
         if tags_grouping_type == 'or':
             # выведи задания у которых есть tag1 or tag2 etc
-            queryset = queryset.filter(tags__in=tags)
+
+            # distinct удаляет дубликаты заданий. В какой-то момент
+            # их изза разных запросов может добавиться несколько экземпляров
+            queryset = queryset.filter(tags__in=tags).distinct()
         elif tags_grouping_type == 'and':
             # выведи задания у которых есть tag1 and tag2 etc
             for tag in tags:
@@ -100,8 +103,9 @@ def search_in_tasks(queryset, search_query):
 # вторая обозначает, что параметры фильтрации передаются в теле запроса
 
 filters_location_in_request_object = 'query_params'
-# filters_location_in_request_object = 'data'
 
+
+# filters_location_in_request_object = 'data'
 
 
 def get_filtering_by_fields_params(request):
@@ -160,20 +164,28 @@ def informational_endpoint_view(request):
     information_dictionary = {'tags_info': [TagInfoSerializer(tag).data for tag in TaskTag.objects.all()],
                               'subjects_info': [SubjectInfoSerializer(subject).data for subject in
                                                 TaskSubject.objects.all()],
-                              'filters_info': {'fields_filters': {'tags_grouping_type': ['and', 'or'],
-                                                                  'tags': None,
-                                                                  'task_status': TASK_STATUS_CHOICES,
-                                                                  'stage': STAGE_OF_STUDY_CHOICES,
-                                                                  'course_min': 0,
-                                                                  'course_max': 15,
-                                                                  'subjects': None,
-                                                                  'author_rating_min': 0,
-                                                                  'author_rating_max': 10},
-                                               'search_filter': 'search_query',
-                                               'date_filters': {'date_start': None, 'date_end': None,
-                                                                'date_type': Task.datetime_fileds_names,
-                                                                'date_format': '%Y-%m-%d'},
-                                               'sort': sort_fields_info},
+                              'task_filters_info': {'fields_filters': {'tags_grouping_type': ['and', 'or'],
+                                                                       'tags': None,
+                                                                       'task_status': TASK_STATUS_CHOICES,
+                                                                       'stage': STAGE_OF_STUDY_CHOICES,
+                                                                       'course_min': 0,
+                                                                       'course_max': 15,
+                                                                       'subjects': None,
+                                                                       'author_rating_min': 0,
+                                                                       'author_rating_max': 10},
+                                                    'search_filter': 'search_query',
+                                                    'date_filters': {'date_start': None, 'date_end': None,
+                                                                     'date_type': Task.datetime_fileds_names,
+                                                                     'date_format': '%Y-%m-%d'},
+                                                    'sort': sort_fields_info},
+
+                              'reviews_filters_info': {'fields_filters': {'review_type': ['all', 'send', 'received'],
+                                                                          'rating_min': 0,
+                                                                          'rating_max': 10},
+                                                       'date_filters': {'date_start': None, 'date_end': None,
+                                                                        'date_format': '%Y-%m-%d'}
+                                                       },
+
                               'profile_choices_info': {'stage_of_study_choices': STAGE_OF_STUDY_CHOICES}}
 
     return Response(information_dictionary)
@@ -215,9 +227,7 @@ class TaskList(generics.ListAPIView):
             if sort.endswith('author_rating'):
                 sort = sort.replace('author_rating', 'author__author_rating_normalized')
             queryset = queryset.order_by(sort)
-        # distinct удаляет дубликаты заданий. В какой-то момент
-        # их изза разных запросов может добавиться несколько экземпляров
-        return queryset.distinct()
+        return queryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -373,8 +383,9 @@ class CreateReview(generics.CreateAPIView):
             return Response({'detail': f"Создатель задачи еще не закрыл ее. Вы не можете оставить отзыв"},
                             status=status.HTTP_400_BAD_REQUEST)
         elif not task.implementer:
-            return Response({'detail': f"На эту задачу так и не был назначен исполнитель. На нее нельзя оставлять отзывы"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': f"На эту задачу так и не был назначен исполнитель. На нее нельзя оставлять отзывы"},
+                status=status.HTTP_400_BAD_REQUEST)
         elif Review.objects.filter(task=task, reviewer=request.user):
             return Response({'detail': f"Вы уже оставляли отзыв на эту задачу. Вы можете отредактировать старый"},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -486,37 +497,37 @@ class ReviewList(generics.ListAPIView):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        reviewerid = self.request.parser_context['kwargs'].get('reviewerid', None)
-        reviewerusername = self.request.parser_context['kwargs'].get('reviewerusername', None)
+        userid = self.request.parser_context['kwargs'].get('reviewerid', None)
+        username = self.request.parser_context['kwargs'].get('reviewerusername', None)
 
-        reviewreceiverid = self.request.parser_context['kwargs'].get('reviewreceiverid', None)
-        reviewreceiverusername = self.request.parser_context['kwargs'].get('reviewreceiverusername', None)
+        query_params = getattr(self.request, 'query_params')
+        review_type = query_params.get('review_type', 'all')  # send/received
+        date_start = query_params.get('date_start', None)
+        date_end = query_params.get('date_end', None)
+        rating_min = query_params.get('rating_min', 0)
+        rating_max = query_params.get('rating_max', 10)
 
-        if reviewerid is not None:
-            queryset = Review.objects.filter(reviewer__id=reviewerid)
-        elif reviewerusername is not None:
-            queryset = Review.objects.filter(reviewer__username=reviewerusername)
-
-        elif reviewreceiverid is not None:
-            # берем те отзывы, которые ссылаются на те задания, к которым юзер имеет отношение (автор/исполнитель)
-            # но при этом откидываем из них те, которые оставил сам юзер
-            # на выходе получаем только отзывы оставленные на этого юзера
-            queryset = Review.objects.filter((Q(task__implementer__id=reviewreceiverid) |
-                                              Q(task__author__id=reviewreceiverid)) &
-                                             ~Q(reviewer__id=reviewreceiverid))
-        elif reviewerusername is not None:
-            # берем те отзывы, которые ссылаются на те задания, к которым юзер имеет отношение (автор/исполнитель)
-            # но при этом откидываем из них те, которые оставил сам юзер
-            # на выходе получаем только отзывы оставленные на этого юзера
-            queryset = Review.objects.filter((Q(task__implementer__username=reviewerusername) |
-                                              Q(task__author__username=reviewerusername)) &
-                                             ~Q(reviewer__username=reviewerusername))
+        if userid is not None:
+            user = User.objects.get(id=userid)
+        elif username is not None:
+            user = User.objects.get(username=username)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        worst = self.request.query_params.get('worst', 0)
-        best = self.request.query_params.get('best', 10)
+        queryset = Review.objects.filter(Q(task__implementer=user) |
+                                         Q(task__author=user))
 
-        queryset = queryset.filter(rating__lte=best, rating__gte=worst)
+        if review_type != 'all':
+            if review_type == 'send':
+                queryset = queryset.filter(reviewer=user)
+            elif review_type == 'received':
+                queryset = queryset.filter(~Q(reviewer=user))
+
+        if date_start is not None:
+            queryset = queryset.filter(created_at__gte=date_start)
+        if date_end is not None:
+            queryset = queryset.filter(created_at__lte=date_end)
+
+        queryset = queryset.filter(rating__gte=rating_min, rating__lte=rating_max)
 
         return queryset

@@ -130,6 +130,7 @@ class Review(models.Model):
 
     class Meta:
         unique_together = ('reviewer', 'task')
+        ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
