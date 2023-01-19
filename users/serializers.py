@@ -68,7 +68,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserDetailSerializer(serializers.ModelSerializer):
     statistics = serializers.SerializerMethodField(read_only=True)
-    contact = serializers.SerializerMethodField(read_only=True)
+    contacts = serializers.SerializerMethodField(read_only=True)
     profile = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -76,14 +76,14 @@ class UserDetailSerializer(serializers.ModelSerializer):
                   'username',
                   'email',
                   'profile',
-                  'contact',
+                  'contacts',
                   'statistics')
         model = User
 
     def get_statistics(self, user):
         return UserStatisticsSerializer(user).data
 
-    def get_contact(self, user):
+    def get_contacts(self, user):
         if self.context['request'].user == user:
             # контакты возвращаются только если юзер пытается просмотреть сам себя
             return UserContactSerializer(user).data
