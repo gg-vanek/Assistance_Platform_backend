@@ -94,7 +94,7 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
 
 def search_in_tasks(queryset, search_query):
     if search_query is not None:
-        queryset = queryset.filter(title__icontains=search_query)
+        queryset = queryset.filter(Q(title__icontains=search_query)|Q(description__icontains=search_query))
     return queryset
 
 
