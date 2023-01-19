@@ -88,7 +88,13 @@ class UserDetailSerializer(serializers.ModelSerializer):
             # контакты возвращаются только если юзер пытается просмотреть сам себя
             return UserContactSerializer(user).data
         else:
-            return None
+            # TODO это захардкожено и это плохо
+            return {"first_name": "",
+                    "email": "скрыто",
+                    "phone": "скрыто",
+                    "telegram": "скрыто",
+                    "vk": "скрыто"
+                    }
 
     def get_profile(self, user):
         return UserProfileSerializer(user).data
