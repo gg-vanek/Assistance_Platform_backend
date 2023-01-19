@@ -1,4 +1,6 @@
 from django.urls import path
+
+from .generator_views import generate_tasks
 from .views import TaskList, TaskDetail, CreateTask, TaskApply, ApplicationDetail, SetTaskImplementer, CloseTask, \
     CreateReview, ReviewDetail
 
@@ -16,4 +18,6 @@ urlpatterns = [
     path('<int:pk>/my_review', ReviewDetail.as_view()),  # эндпоинт для просмотра отзыва от текущего пользователя
 
     path('new_task', CreateTask.as_view()),  # создание новой задачи
+
+    path('generator', generate_tasks)
 ]

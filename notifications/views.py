@@ -20,7 +20,6 @@ class NotificationList(generics.ListAPIView):
         else:
             pass
 
-
         return queryset
 
     def list(self, request, *args, **kwargs):
