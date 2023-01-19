@@ -21,6 +21,7 @@ class SubjectInfoSerializer(serializers.ModelSerializer):
 # display/edit serializers
 class TaskSerializer(serializers.ModelSerializer):
     applicants = serializers.SerializerMethodField(read_only=True)
+    author = serializers.CharField(source='author.username', read_only=True)
     author_rating_normalized = serializers.FloatField(source='author.author_rating_normalized', read_only=True)
 
     class Meta:
