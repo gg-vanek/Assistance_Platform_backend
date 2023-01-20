@@ -33,7 +33,7 @@ class NotificationList(generics.ListAPIView):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        response = Response(serializer.data)
+        response = Response({"notifications": serializer.data, "new": queryset.filter(checked=False).count()})
 
         for notification in queryset:
             notification.checked = True
