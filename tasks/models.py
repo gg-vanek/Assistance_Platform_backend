@@ -71,7 +71,7 @@ class Task(models.Model):
         new_notification(user=self.author,
                          type='created_task',
                          affected_object_id=self.id,
-                         message=f"Ваше задание {self.id} успешно создано/отредактировано",
+                         message=f"Ваше задание {self.id} успешно создано/отредактировано/закрыто",
                          checked=0)
 
 
