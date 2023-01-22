@@ -146,7 +146,7 @@ class Review(models.Model):
                          message=f"Вы успешно создали/отредактировали отзыв к заданию {self.task.id}",
                          checked=0)
         # notification_to_receiver
-        new_notification(user=self.reviewer,
+        new_notification(user=receiver,
                          type='received_review',
                          affected_object_id=self.task.id,
                          message=f"Был создан/изменен отзыв о вас по заданию {self.task.id}",

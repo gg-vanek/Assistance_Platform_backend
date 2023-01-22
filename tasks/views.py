@@ -112,7 +112,7 @@ def get_filtering_by_fields_params(request):
     all_filters = getattr(request, filters_location_in_request_object)
     return {'tags': all_filters.get('tags', None),
             'tags_grouping_type': all_filters.get('tags_grouping_type', 'or'),
-            'task_status': all_filters.get('task_status', None),
+            'task_status': all_filters.get('task_status', 'A'),
             'difficulty_stage_of_study': all_filters.get('stage', None),
             'difficulty_course_of_study_min': all_filters.get('course_min', 0),
             'difficulty_course_of_study_max': all_filters.get('course_max', 15),
@@ -133,10 +133,10 @@ def get_filtering_by_date_params(request):
 @permission_classes((permissions.AllowAny,))
 def informational_endpoint_view(request):
     # TODO добавить сортировку по рейтингу автора задачи
-    sort_fields = [field.name for field in Task._meta.get_fields()]
+    sort_fields = [field.name for field in Task._meta.get_fields()] + ['author_rating']
 
     not_for_sort_fields = ["id", "applications", "files", "difficulty_stage_of_study", "author", "implementer",
-                           "description", "tags", 'reviews']
+                           "status", "description", "tags", 'reviews']
     print(sort_fields)
     for field in not_for_sort_fields:
         if field in sort_fields:
@@ -145,10 +145,9 @@ def informational_endpoint_view(request):
     sort_fields_names = {'title': 'Название',
                          'difficulty_course_of_study': 'Класс/курс обучения',
                          'subject': 'Предмет',
-                         'status': 'Статус задачи',
                          'created_at': 'Дата создания',
                          'updated_at': 'Дата последнего редактирования',
-                         'stop_accepting_applications_at': 'Дата планируемого окончания рпиема заявок',
+                         'stop_accepting_applications_at': 'Дата планируемого окончания приема заявок',
                          'expires_at': 'Дата планируемого закрытия задачи',
                          'closed_at': 'Дата закрытия задачи',
                          'price': 'Вознаграждение за решение',

@@ -64,11 +64,11 @@ class User(AbstractUser):
     # статистическая информация о пользователе
     author_rating = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     author_review_counter = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    author_rating_normalized = models.FloatField(default=0, validators=[MinValueValidator(0)])
+    author_rating_normalized = models.FloatField(default=7.5, validators=[MinValueValidator(0)])
 
     implementer_rating = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     implementer_review_counter = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    implementer_rating_normalized = models.FloatField(default=0, validators=[MinValueValidator(0)])
+    implementer_rating_normalized = models.FloatField(default=7.5, validators=[MinValueValidator(0)])
 
     def __str__(self):
         return self.username
