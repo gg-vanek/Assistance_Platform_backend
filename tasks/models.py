@@ -12,12 +12,18 @@ TASK_STATUS_CHOICES = [('A', 'accepting applications'), ('P', 'in progress'), ('
 class TaskTag(models.Model):
     name = models.CharField(max_length=50, blank=False, unique=True)
 
+    class Meta:
+        ordering = ['name']
+
     def __str__(self):
         return self.name
 
 
 class TaskSubject(models.Model):
     name = models.CharField(max_length=50, blank=False, unique=True)
+
+    class Meta:
+        ordering = ['name']
 
     def __str__(self):
         return self.name
