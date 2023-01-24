@@ -84,7 +84,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return UserStatisticsSerializer(user).data
 
     def get_contacts(self, user):
-        if self.context['request'].user == user:
+        if user.show_contacts or self.context['request'].user == user:
             # контакты возвращаются только если юзер пытается просмотреть сам себя
             return UserContactSerializer(user).data
         else:

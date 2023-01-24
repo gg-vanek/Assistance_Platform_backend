@@ -27,7 +27,8 @@ class CustomUserAdmin(UserAdmin):
         }),
         ("Important dates", {"fields": ("last_login", "date_joined")},),
         ("Ratings", {"fields": ("author_rating", "author_review_counter", "author_rating_normalized",
-                                "implementer_rating", "implementer_review_counter", "implementer_rating_normalized",)},)
+                                "implementer_rating", "implementer_review_counter", "implementer_rating_normalized",)}),
+        ("Settings", {"fields": ("show_contacts", "send_email_notifications",)},)
     )
 
 

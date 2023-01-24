@@ -70,6 +70,10 @@ class User(AbstractUser):
     implementer_review_counter = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     implementer_rating_normalized = models.FloatField(default=7.5, validators=[MinValueValidator(0)])
 
+    # User settings
+    show_contacts = models.BooleanField(default=False)
+    send_email_notifications = models.BooleanField(default=False)
+
     def __str__(self):
         return self.username
 
