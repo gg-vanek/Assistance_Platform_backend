@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions
 from .models import User
-from .serializers import UserSerializer, UserDetailSerializer, UserRegistrationSerializer, UserSettingsSerializer
+from .serializers import UserSerializer, UserDetailSerializer, UserRegistrationSerializer, UserSettingsSerializer, \
+    UserContactsSerializer, UserProfileSerializer
 
 from .permissions import IsAccountOwnerOrReadOnly, IsAccountOwner
 from rest_framework import response, status
@@ -36,3 +37,14 @@ class UserSettings(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSettingsSerializer
 
+
+class UserContacts(generics.RetrieveUpdateAPIView):
+    permission_classes = (IsAccountOwner,)
+    queryset = User.objects.all()
+    serializer_class = UserContactsSerializer
+
+
+class UserProfile(generics.RetrieveUpdateAPIView):
+    permission_classes = (IsAccountOwner,)
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer

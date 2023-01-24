@@ -17,7 +17,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
 
 
-class UserContactSerializer(serializers.ModelSerializer):
+class UserContactsSerializer(serializers.ModelSerializer):
     class Meta:
         fields = (
             'first_name',
@@ -74,7 +74,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id',
                   'username',
-                  'email',
                   'profile',
                   'contacts',
                   'statistics')
@@ -86,7 +85,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
     def get_contacts(self, user):
         if user.show_contacts or self.context['request'].user == user:
             # контакты возвращаются только если юзер пытается просмотреть сам себя
-            return UserContactSerializer(user).data
+            return UserContactsSerializer(user).data
         else:
             # TODO это захардкожено и это плохо
             return {"first_name": "",
