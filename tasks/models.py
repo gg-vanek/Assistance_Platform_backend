@@ -1,6 +1,5 @@
 from django.db import models
 
-from notifications.models import new_notification
 from users.models import User, STAGE_OF_STUDY_CHOICES
 from django.conf import settings
 import os
@@ -70,16 +69,6 @@ class Task(models.Model):
         # только для использоавния в админке
         return ", ".join([tag.name for tag in self.tags.all()])
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        # TODO переделать если добавится модерация
-        # уведомление автору задачи
-        new_notification(user=self.author,
-                         type='created_task',
-                         affected_object_id=self.id,
-                         message=f"Ваше задание {self.id} успешно создано/отредактировано/закрыто",
-                         checked=0)
-
 
 class Application(models.Model):
     applicant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='applications')
@@ -94,23 +83,6 @@ class Application(models.Model):
 
     def __str__(self):
         return str(self.applicant) + '. task ' + str(self.task.id) + '. application ' + str(self.id)
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        # notification_to_applicant
-        new_notification(user=self.applicant,
-                         type='created_application',
-                         affected_object_id=self.task.id,
-                         message=f"Ваша заявка на задание {self.task.id} "
-                                 f"успешно создана/отредактирована",
-                         checked=0)
-        # notification_to_author
-        new_notification(send_email=True,
-                         user=self.task.author,
-                         type='received_application',
-                         affected_object_id=self.task.id,
-                         message=f"На ваше задание {self.task.id} подали заявку",
-                         checked=0)
 
 
 class TaskFile(models.Model):
@@ -137,23 +109,3 @@ class Review(models.Model):
     class Meta:
         unique_together = ('reviewer', 'task')
         ordering = ['-created_at']
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.task.author == self.reviewer:
-            receiver = self.task.implementer
-        elif self.task.implementer == self.reviewer:
-            receiver = self.task.author
-
-        # notification_to_reviewer
-        new_notification(user=self.reviewer,
-                         type='created_review',
-                         affected_object_id=self.task.id,
-                         message=f"Вы успешно создали/отредактировали отзыв к заданию {self.task.id}",
-                         checked=0)
-        # notification_to_receiver
-        new_notification(user=receiver,
-                         type='received_review',
-                         affected_object_id=self.task.id,
-                         message=f"Был создан/изменен отзыв о вас по заданию {self.task.id}",
-                         checked=0)

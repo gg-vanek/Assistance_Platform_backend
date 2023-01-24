@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from notifications.models import new_notification
 from users.models import User
 from users.serializers import UserContactSerializer
 from .models import Task, Application, TaskTag, TaskSubject, Review
@@ -198,7 +199,6 @@ class SetTaskImplementerSerializer(serializers.ModelSerializer):
             return task.implementer
 
         # если еще нет implementer; если accepting applications
-        print(task.implementer)
         if not (task.implementer is None):
             raise serializers.ValidationError(f'This task (id = {task.id}) already have implementer')
         if not (task.status == 'A'):
@@ -216,12 +216,31 @@ class SetTaskImplementerSerializer(serializers.ModelSerializer):
         task.implementer = User.objects.get(username=implementer_username)  # задать юзера как исполнителя
         task.save()
 
+        # если ошибок не вылезло, то отправить уведомление создателю задачи
+        new_notification(user=task.author,
+                         type='set_task_implementer_notification',
+                         affected_object_id=task.id,
+                         message=f"Вы успешно назначили исполнителя на задание {task.id}",
+                         checked=0)
+        # и новому исполнителю тоже уведомление
+        new_notification(user=task.implementer,
+                         type='application_accepted_notification',
+                         affected_object_id=task.id,
+                         message=f"Вас назначили исполнителем на задание {task.id}",
+                         checked=0)
+
         applications = task.applications.all()
         for application in applications:
             if application.applicant.username == implementer_username:
                 application.status = 'A'  # статус ACCEPTED
             else:
                 application.status = 'R'  # статус REJECTED
+                # и всем, чья заявка отклонена тоже уведомления
+                new_notification(user=application.applicant,
+                                 type='application_rejected_notification',
+                                 affected_object_id=task.id,
+                                 message=f"Ваша заявка на задание {task.id} отклонена",
+                                 checked=0)
             application.save()
 
         return implementer_username
@@ -245,6 +264,8 @@ class CloseTaskSerializer(serializers.ModelSerializer):
     def update(self, task, validated_data):
         if task.status == 'C':
             raise serializers.ValidationError(f'Задача уже была закрыта ранее')
+        elif not task.implementer:
+            raise serializers.ValidationError(f'Нельзя закрыть задачу без исполнителя, вы можете удалить ее')
         elif validated_data['confirm'] == 'Я подтверждаю, что хочу закрыть задачу':
             task.status = 'C'
             task.save()

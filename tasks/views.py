@@ -2,6 +2,8 @@ from rest_framework import generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
+
+from notifications.models import new_notification
 from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES, Review
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
     ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, \
@@ -94,7 +96,7 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
 
 def search_in_tasks(queryset, search_query):
     if search_query is not None:
-        queryset = queryset.filter(Q(title__icontains=search_query)|Q(description__icontains=search_query))
+        queryset = queryset.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
     return queryset
 
 
@@ -285,6 +287,27 @@ class CloseTask(generics.UpdateAPIView):
     serializer_class = CloseTaskSerializer
     queryset = Task.objects.all()
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        task = self.get_object()
+        serializer = self.get_serializer(task, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(task, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            task._prefetched_objects_cache = {}
+
+        if task.implementer:
+            new_notification(user=task.implementer,
+                             type='closed_task_notification',
+                             affected_object_id=task.id,
+                             message=f"Автор задания {task.id} закрыл его. Вы можете оставить отзыв.",
+                             checked=0)
+
+        return Response(serializer.data)
+
 
 # эндпоинты для работы с заявками
 class ApplicationsList(generics.ListAPIView):
@@ -354,9 +377,15 @@ class TaskApply(generics.CreateAPIView):
             return Response({'detail': "Ваша заявка уже отправлена вы не можете добавить новую,"
                                        " но можете отредактировать старую"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-        self.perform_create(serializer, data)
-
+        application = self.perform_create(serializer, data)
         headers = self.get_success_headers(serializer.data)
+
+        new_notification(user=task.author,
+                         type='application_notification',
+                         affected_object_id=task.id,
+                         message=f"На ваше задание {task.id} отправлена новая заявка",
+                         checked=0)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer, data={}):
@@ -369,6 +398,7 @@ class SetTaskImplementer(generics.RetrieveUpdateAPIView):
     permission_classes = (IsTaskOwnerOrReadOnly,)
     serializer_class = SetTaskImplementerSerializer
     queryset = Task.objects.all()
+    # уведомления отправляются через сериализатор
 
 
 # работа с отзывами
@@ -403,38 +433,34 @@ class CreateReview(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        self.perform_create(serializer, data)
+        review = self.perform_create(serializer, data)
         # если ошибок не выскочило, то нужно пересчитать рейтинг пользователя которому поставили отзыв
-        self.update_rating(task=task, rating=request.data['rating'], review_type=data['review_type'])
+        update_rating(task=task, review_type=data['review_type'],
+                      rating_delta=request.data['rating'],
+                      counter_delta=1)
 
         headers = self.get_success_headers(serializer.data)
+
+        # если все прошло хорошо и до сих пор нет ошибок, то отправить уведомления
+        if review.task.author == review.reviewer:
+            receiver = review.task.implementer
+        elif review.task.implementer == review.reviewer:
+            receiver = review.task.author
+
+        # notification_to_receiver
+        new_notification(user=receiver,
+                         type='review_notification',
+                         affected_object_id=review.task.id,
+                         message=f"Был оставлен отзыв о вас по заданию {review.task.id}",
+                         checked=0)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer, data={}):
-        serializer.save(**data)
-
-    def update_rating(self, task, rating, review_type):
-        rating = int(rating)
-        if review_type == 'A':
-            # если ревью от автора то пересчитываем исполнителя
-            implementer = task.implementer
-            implementer.implementer_rating += rating
-            implementer.implementer_review_counter += 1
-            implementer.save()
-            implementer.update_implementer_rating()
-
-        if review_type == 'I':
-            # если ревью от исполнителя то пересчитываем автора
-            author = task.author
-            author.author_rating += rating
-            author.author_review_counter += 1
-            author.save()
-            author.update_author_rating()
+        return serializer.save(**data)
 
 
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
-    # при GET запросе возвращается список заявок
-    # при пост запросе необходимо в теле запроса передать implementer=userID и он установится как исполнитель
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = ReviewSerializer
 
@@ -468,27 +494,29 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
 
         review = self.get_object()
         self.perform_destroy(review)
-        self.update_rating(task=task, review_type=review.review_type,
-                           rating_delta=-review.rating,
-                           counter_delta=-1)
+        update_rating(task=task, review_type=review.review_type,
+                      rating_delta=-review.rating,
+                      counter_delta=-1)
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def update_rating(self, task, review_type, rating_delta, counter_delta):
-        if review_type == 'A':
-            # если ревью от автора то пересчитываем исполнителя
-            implementer = task.implementer
-            implementer.implementer_rating += rating_delta
-            implementer.implementer_review_counter += counter_delta
-            implementer.save()
-            implementer.update_implementer_rating()
 
-        if review_type == 'I':
-            # если ревью от исполнителя то пересчитываем автора
-            author = task.author
-            author.author_rating += rating_delta
-            author.author_review_counter += counter_delta
-            author.save()
-            author.update_author_rating()
+def update_rating(task, review_type, rating_delta, counter_delta):
+    if review_type == 'A':
+        # если ревью от автора то пересчитываем исполнителя
+        implementer = task.implementer
+        implementer.implementer_rating += rating_delta
+        implementer.implementer_review_counter += counter_delta
+        implementer.save()
+        implementer.update_implementer_rating()
+
+    if review_type == 'I':
+        # если ревью от исполнителя то пересчитываем автора
+        author = task.author
+        author.author_rating += rating_delta
+        author.author_review_counter += counter_delta
+        author.save()
+        author.update_author_rating()
 
 
 class ReviewList(generics.ListAPIView):
@@ -530,3 +558,4 @@ class ReviewList(generics.ListAPIView):
         queryset = queryset.filter(rating__gte=rating_min, rating__lte=rating_max)
 
         return queryset
+
