@@ -13,3 +13,9 @@ class IsAccountOwnerOrReadOnly(permissions.BasePermission):
             # staff can do whatever they want to any accs except superuser and staff ones
             return True
         return obj == request.user
+
+
+class IsAccountOwner(permissions.BasePermission):
+    # Also if user is_staff it means that he "is account owner"
+    def has_object_permission(self, request, view, obj):
+        return obj == request.user

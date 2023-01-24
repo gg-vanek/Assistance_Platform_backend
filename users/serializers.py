@@ -100,6 +100,13 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return UserProfileSerializer(user).data
 
 
+class UserSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('show_contacts',
+                  'send_email_notifications',)
+        model = User
+
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(min_length=6, max_length=128, write_only=True)
 

@@ -1,8 +1,8 @@
 from rest_framework import generics, permissions
 from .models import User
-from .serializers import UserSerializer, UserDetailSerializer, UserRegistrationSerializer
+from .serializers import UserSerializer, UserDetailSerializer, UserRegistrationSerializer, UserSettingsSerializer
 
-from .permissions import IsAccountOwnerOrReadOnly
+from .permissions import IsAccountOwnerOrReadOnly, IsAccountOwner
 from rest_framework import response, status
 
 
@@ -29,3 +29,10 @@ class UserRegistration(generics.CreateAPIView):
             serializer.save()
             return response.Response(serializer.data, status=status.HTTP_200_OK)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserSettings(generics.RetrieveUpdateAPIView):
+    permission_classes = (IsAccountOwner,)
+    queryset = User.objects.all()
+    serializer_class = UserSettingsSerializer
+
