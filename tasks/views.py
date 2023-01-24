@@ -6,8 +6,8 @@ from django.db.models import Q
 from notifications.models import new_notification
 from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES, Review
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
-    ApplicationDetailSerializer, TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, \
-    SetTaskImplementerSerializer, ReviewSerializer, CloseTaskSerializer
+    TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, SetTaskImplementerSerializer, \
+    ReviewSerializer, CloseTaskSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
@@ -338,7 +338,7 @@ class ApplicationsList(generics.ListAPIView):
 
 class ApplicationDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = ApplicationDetailSerializer
+    serializer_class = ApplicationSerializer
 
     def get_queryset(self):
         queryset = Application.objects.all()
