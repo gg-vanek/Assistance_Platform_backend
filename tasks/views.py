@@ -29,7 +29,7 @@ def filter_for_person(queryset, request):
     elif kwarg_key == 'implementerusername':
         queryset = queryset.filter(implementer__username=kwarg[kwarg_key])
     else:
-        pass
+        queryset = queryset.filter(~Q(author=request.user))
     return queryset
 
 
