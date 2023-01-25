@@ -6,6 +6,12 @@ from users.serializers import UserContactsSerializer
 from .models import Task, Application, TaskTag, TaskSubject, Review, TaskFile
 
 
+class TaskFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('id', 'file',)
+        model = TaskFile
+
+
 # informational serializers
 class TagInfoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,7 +95,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         model = Task
 
     def get_files(self, task):
-        return [file.id for file in task.files.all()]
+        return [TaskFileSerializer(file).data for file in task.files.all()]
 
     def get_applicants(self, task):
         applications = task.applications.all().order_by('-applicant__implementer_rating_normalized')
@@ -132,7 +138,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
         model = Application
 
     def get_task(self, application):
-        print(application)
         return TaskSerializer(application.task).data
 
 
