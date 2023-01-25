@@ -14,7 +14,8 @@ class TaskAdmin(admin.ModelAdmin):
         ('Author and implementer', {'fields': ('author', 'implementer',)}),
         ('Task info', {'fields': ('description', 'subject', 'tags', 'status',)}),
         ('Difficulty', {'fields': ('difficulty_stage_of_study', 'difficulty_course_of_study',)}),
-        ("Dates", {"fields": ('stop_accepting_applications_at', 'expires_at',)}),)
+        ("Dates", {"fields": ('stop_accepting_applications_at', 'expires_at',)}),
+    )
 
 
 class TaskTagAdmin(admin.ModelAdmin):
@@ -29,10 +30,7 @@ class TaskSubjectAdmin(admin.ModelAdmin):
 
 class TaskFileAdmin(admin.ModelAdmin):
     model = TaskFile
-    list_display = ('filename', 'file',)
-
-    # fields = [field.name for field in model._meta.fields if field.name != "id"]
-    exclude = ('id',)
+    list_display = ('id', 'file',)
 
 
 class ApplicationAdmin(admin.ModelAdmin):

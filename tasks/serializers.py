@@ -2,8 +2,8 @@ from rest_framework import serializers
 
 from notifications.models import new_notification
 from users.models import User
-from users.serializers import UserContactSerializer
-from .models import Task, Application, TaskTag, TaskSubject, Review
+from users.serializers import UserContactsSerializer
+from .models import Task, Application, TaskTag, TaskSubject, Review, TaskFile
 
 
 # informational serializers
@@ -61,7 +61,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     expires_at = serializers.DateTimeField()
 
     contacts = serializers.SerializerMethodField(read_only=True)
-
+    files = serializers.SerializerMethodField(read_only=True)
     status = serializers.CharField(read_only=True)
     reviews = serializers.SerializerMethodField(read_only=True)
 
@@ -78,6 +78,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'tags',
                   'subject',
                   'description',
+                  'files',
                   'stop_accepting_applications_at',
                   'status',
                   'contacts',
@@ -86,6 +87,9 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'updated_at',
                   'expires_at',)
         model = Task
+
+    def get_files(self, task):
+        return [file.id for file in task.files.all()]
 
     def get_applicants(self, task):
         applications = task.applications.all().order_by('-applicant__implementer_rating_normalized')
@@ -97,9 +101,9 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         if task.implementer is None:
             return None
         elif user == task.implementer:
-            return {'author': UserContactSerializer(task.author).data}
+            return {'author': UserContactsSerializer(task.author).data}
         elif user == task.author:
-            return {'implementer': UserContactSerializer(task.implementer).data}
+            return {'implementer': UserContactsSerializer(task.implementer).data}
         else:
             return None
 
@@ -126,7 +130,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
                   'created_at',
                   'updated_at',)
         model = Application
-
 
     def get_task(self, application):
         print(application)
@@ -262,3 +265,15 @@ class CloseTaskSerializer(serializers.ModelSerializer):
             return task
         else:
             raise serializers.ValidationError(f'Задача не была закрыта')
+
+
+class AddFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('file',)
+        model = TaskFile
+
+    def create(self, validated_data):
+        task_id = self.context['request'].parser_context['kwargs'].get('pk', None)
+        task = Task.objects.get(id=task_id)
+        validated_data['task'] = task
+        return super().create(validated_data)

@@ -4,15 +4,15 @@ from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
 
 from notifications.models import new_notification
-from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES, Review
+from .models import Task, Application, TaskTag, TaskSubject, TASK_STATUS_CHOICES, Review, TaskFile
 from .serializers import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer, TaskApplySerializer, \
     TagInfoSerializer, SubjectInfoSerializer, ApplicationSerializer, SetTaskImplementerSerializer, \
-    ReviewSerializer, CloseTaskSerializer
+    ReviewSerializer, CloseTaskSerializer, AddFileSerializer
 from rest_framework.response import Response
 
 from rest_framework import status
 import datetime
-from .permissions import IsTaskOwnerOrReadOnly, IsTaskImplementerOrTaskOwner
+from .permissions import IsTaskOwnerOrReadOnly, IsTaskImplementerOrTaskOwner, IsTaskOwnerForFileWork
 
 from users.models import STAGE_OF_STUDY_CHOICES, User
 
@@ -309,6 +309,23 @@ class CloseTask(generics.UpdateAPIView):
         return Response(serializer.data)
 
 
+class AddFile(generics.CreateAPIView):
+    permission_classes = (IsTaskOwnerForFileWork,)
+    serializer_class = AddFileSerializer
+
+
+class DeleteFile(generics.DestroyAPIView):
+    permission_classes = (IsTaskOwnerForFileWork,)
+
+    def get_object(self):
+        task = Task.objects.get(id=self.request.parser_context['kwargs'].get('pk', None))
+        file = TaskFile.objects.get(id=self.request.query_params['file_id'])
+        if file.task != task:
+            return Response({'detail': f"Файл который вы пытаетесь удалить относится к другому заданию"})
+
+        return file
+
+
 # эндпоинты для работы с заявками
 class ApplicationsList(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -558,4 +575,3 @@ class ReviewList(generics.ListAPIView):
         queryset = queryset.filter(rating__gte=rating_min, rating__lte=rating_max)
 
         return queryset
-

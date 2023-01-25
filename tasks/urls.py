@@ -2,7 +2,7 @@ from django.urls import path
 
 from .generator_views import generate_tasks
 from .views import TaskList, TaskDetail, CreateTask, TaskApply, ApplicationDetail, SetTaskImplementer, CloseTask, \
-    CreateReview, ReviewDetail
+    CreateReview, ReviewDetail, AddFile, DeleteFile
 
 urlpatterns = [
     path('', TaskList.as_view()),  # список заданий
@@ -12,6 +12,8 @@ urlpatterns = [
     path('<int:task>/my_application', ApplicationDetail.as_view(lookup_field='task')),
     # просмотр отправленной текущим юзером заявки
     path('<int:pk>/close_task', CloseTask.as_view()),
+    path('<int:pk>/add_file', AddFile.as_view()),
+    path('<int:pk>/delete_file', DeleteFile.as_view()),
     # перевод задания из любого статуса в статус "закрыта" (делает автор задачи)
 
     path('<int:pk>/new_review', CreateReview.as_view()),  # эндпоинт для оставления отзыва

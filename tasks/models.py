@@ -86,12 +86,11 @@ class Application(models.Model):
 
 
 class TaskFile(models.Model):
-    filename = models.CharField(max_length=50, blank=False)
-    file = models.FileField(upload_to=os.path.join(settings.MEDIA_ROOT, f'tasks/task_files'))
+    file = models.FileField(upload_to=f'tasks/task_files')
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='files')
 
     def __str__(self):
-        return self.filename
+        return str(self.id)
 
 
 class Review(models.Model):

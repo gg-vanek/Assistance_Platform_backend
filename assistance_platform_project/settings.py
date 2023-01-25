@@ -9,6 +9,14 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+# эти три строки - так называемый monkey patching
+# проблема в том, что в джанго 4.0 убрали один метод и зщаменили его на другой,
+# а библиотека которая сохраняет картинки с именем хэша использует старый
+# ну собстно мы его задаем равным новому - переименованному - и все в шоколаде
+import django
+from django.utils.encoding import force_str
+django.utils.encoding.force_text = force_str
+
 from datetime import timedelta
 from pathlib import Path
 import os
@@ -18,6 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+DEFAULT_FILE_STORAGE = 'django_hashedfilenamestorage.storage.HashedFilenameFileSystemStorage'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/

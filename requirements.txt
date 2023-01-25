@@ -1,6 +1,7 @@
 asgiref==3.5.2
 Django==4.1.2
 django-cors-headers==3.13.0
+django-hashedfilenamestorage==2.4.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.1
 Pillow==9.2.0

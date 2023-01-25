@@ -21,3 +21,10 @@ class IsTaskImplementerOrTaskOwner(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         return request.user == task.implementer or request.user == task.author
+
+
+class IsTaskOwnerForFileWork(permissions.BasePermission):
+    # Also if user is_staff it means that he "is account owner"
+    def has_object_permission(self, request, view, obj):
+        task = Task.objects.get(id=request.parser_context['kwargs']['pk'])
+        return request.user == task.author
