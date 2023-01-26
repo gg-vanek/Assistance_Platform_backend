@@ -27,7 +27,7 @@ class SubjectInfoSerializer(serializers.ModelSerializer):
 
 # display/edit serializers
 class TaskSerializer(serializers.ModelSerializer):
-    applicants = serializers.SerializerMethodField(read_only=True)
+    applications_amount = serializers.SerializerMethodField(read_only=True)
     author = serializers.CharField(source='author.username', read_only=True)
     author_rating_normalized = serializers.FloatField(source='author.author_rating_normalized', read_only=True)
 
@@ -38,7 +38,7 @@ class TaskSerializer(serializers.ModelSerializer):
                   'author',
                   'author_rating_normalized',
                   'implementer',
-                  'applicants',
+                  'applications_amount',
                   'difficulty_stage_of_study',
                   'difficulty_course_of_study',
                   'tags',
@@ -51,10 +51,8 @@ class TaskSerializer(serializers.ModelSerializer):
                   'expires_at')
         model = Task
 
-    def get_applicants(self, task):
-        applications = task.applications.all()
-        applicants = [application.applicant.username for application in applications]
-        return applicants
+    def get_applications_amount(self, task):
+        return task.applications.all().count()
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):
