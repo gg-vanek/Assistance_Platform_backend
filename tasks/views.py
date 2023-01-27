@@ -47,8 +47,8 @@ def filter_tasks_by_date(queryset, date_start, date_end, date_type):
     return queryset
 
 
-def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, difficulty_stage_of_study,
-                           difficulty_course_of_study_min, difficulty_course_of_study_max, subjects,
+def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, stage_of_study,
+                           course_of_study_min, course_of_study_max, subjects,
                            author_rating_min, author_rating_max):
     if tags is not None:
         if isinstance(tags, str):
@@ -75,10 +75,10 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, diff
             task_status = task_status.split(',')
         queryset = queryset.filter(status__in=task_status)
 
-    if difficulty_stage_of_study is not None:
-        queryset = queryset.filter(difficulty_stage_of_study__in=difficulty_stage_of_study.split(','))
-    queryset = queryset.filter(difficulty_course_of_study__gte=difficulty_course_of_study_min)
-    queryset = queryset.filter(difficulty_course_of_study__lte=difficulty_course_of_study_max)
+    if stage_of_study is not None:
+        queryset = queryset.filter(stage_of_study__in=stage_of_study.split(','))
+    queryset = queryset.filter(course_of_study__gte=course_of_study_min)
+    queryset = queryset.filter(course_of_study__lte=course_of_study_max)
 
     queryset = queryset.filter(author__author_rating_normalized__gte=author_rating_min)
     queryset = queryset.filter(author__author_rating_normalized__lte=author_rating_max)
@@ -115,9 +115,9 @@ def get_filtering_by_fields_params(request):
     return {'tags': all_filters.get('tags', None),
             'tags_grouping_type': all_filters.get('tags_grouping_type', 'or'),
             'task_status': all_filters.get('task_status', 'A'),
-            'difficulty_stage_of_study': all_filters.get('stage', None),
-            'difficulty_course_of_study_min': all_filters.get('course_min', 0),
-            'difficulty_course_of_study_max': all_filters.get('course_max', 15),
+            'stage_of_study': all_filters.get('stage', None),
+            'course_of_study_min': all_filters.get('course_min', 0),
+            'course_of_study_max': all_filters.get('course_max', 15),
             'subjects': all_filters.get('subjects', None),
             'author_rating_min': all_filters.get('author_rating_min', 0),
             'author_rating_max': all_filters.get('author_rating_max', 10)}
@@ -137,7 +137,7 @@ def informational_endpoint_view(request):
     # TODO добавить сортировку по рейтингу автора задачи
     sort_fields = [field.name for field in Task._meta.get_fields()] + ['author_rating']
 
-    not_for_sort_fields = ["id", "applications", "files", "difficulty_stage_of_study", "author", "implementer",
+    not_for_sort_fields = ["id", "applications", "files", "stage_of_study", "author", "implementer",
                            "status", "description", "tags", 'reviews']
     print(sort_fields)
     for field in not_for_sort_fields:
@@ -145,7 +145,7 @@ def informational_endpoint_view(request):
             sort_fields.remove(field)
 
     sort_fields_names = {'title': 'Название',
-                         'difficulty_course_of_study': 'Класс/курс обучения',
+                         'course_of_study': 'Класс/курс обучения',
                          'subject': 'Предмет',
                          'created_at': 'Дата создания',
                          'updated_at': 'Дата последнего редактирования',
@@ -266,10 +266,10 @@ class CreateTask(generics.CreateAPIView):
 
         if req_data.get('stop_accepting_applications_at') == '' or 'stop_accepting_applications_at' not in req_data:
             req_data['stop_accepting_applications_at'] = datetime.datetime.now() + datetime.timedelta(days=7)
-        if req_data.get('difficulty_stage_of_study') == 'N' or 'difficulty_stage_of_study' not in req_data:
-            req_data['difficulty_stage_of_study'] = request.user.stage_of_study
-        if req_data.get('difficulty_course_of_study') == '0' or 'difficulty_course_of_study' not in req_data:
-            req_data['difficulty_course_of_study'] = request.user.course_of_study
+        if req_data.get('stage_of_study') == 'N' or 'stage_of_study' not in req_data:
+            req_data['stage_of_study'] = request.user.stage_of_study
+        if req_data.get('course_of_study') == '0' or 'course_of_study' not in req_data:
+            req_data['course_of_study'] = request.user.course_of_study
 
         serializer = self.get_serializer(data=req_data)
         serializer.is_valid(raise_exception=True)

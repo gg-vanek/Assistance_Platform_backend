@@ -34,8 +34,8 @@ class Task(models.Model):
     title = models.CharField(max_length=255)
     price = models.IntegerField(default=None, null=True)
 
-    difficulty_stage_of_study = models.CharField(max_length=2, choices=STAGE_OF_STUDY_CHOICES, default='N')
-    difficulty_course_of_study = models.IntegerField(default=0, validators=[
+    stage_of_study = models.CharField(max_length=2, choices=STAGE_OF_STUDY_CHOICES, default='N')
+    course_of_study = models.IntegerField(default=0, validators=[
         MinValueValidator(0),
         MaxValueValidator(15),
     ])

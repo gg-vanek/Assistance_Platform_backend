@@ -5,7 +5,7 @@ from .models import Task, TaskTag, TaskSubject, TaskFile, Application, Review
 class TaskAdmin(admin.ModelAdmin):
     model = Task
     list_display = ('id', 'author', 'implementer', 'admin_list_applicants', 'title',
-                    'difficulty_stage_of_study', 'difficulty_course_of_study',
+                    'stage_of_study', 'course_of_study',
                     'admin_list_tags', 'subject', 'description', 'status',
                     'created_at', 'stop_accepting_applications_at', 'expires_at')
 
@@ -13,7 +13,7 @@ class TaskAdmin(admin.ModelAdmin):
         ('Task short info', {'fields': ('title', 'price')}),
         ('Author and implementer', {'fields': ('author', 'implementer',)}),
         ('Task info', {'fields': ('description', 'subject', 'tags', 'status',)}),
-        ('Difficulty', {'fields': ('difficulty_stage_of_study', 'difficulty_course_of_study',)}),
+        ('Difficulty', {'fields': ('stage_of_study', 'course_of_study',)}),
         ("Dates", {"fields": ('stop_accepting_applications_at', 'expires_at',)}),
     )
 
