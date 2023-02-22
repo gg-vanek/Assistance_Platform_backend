@@ -114,7 +114,7 @@ def get_filtering_by_fields_params(request):
     all_filters = getattr(request, filters_location_in_request_object)
     return {'tags': all_filters.get('tags', None),
             'tags_grouping_type': all_filters.get('tags_grouping_type', 'or'),
-            'task_status': all_filters.get('task_status', None if list(request.parser_context['kwargs'].keys())[0] else 'A'),
+            'task_status': all_filters.get('task_status', None if list(request.parser_context['kwargs'].keys()) else 'A'),
             'stage_of_study': all_filters.get('stage', None),
             'course_of_study_min': all_filters.get('course_min', 0),
             'course_of_study_max': all_filters.get('course_max', 15),
