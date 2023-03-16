@@ -57,13 +57,19 @@ class UserStatisticsSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    statistics = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         fields = ('id',
                   'username',
                   'first_name',
                   'last_name',
-                  'email',)
+                  'email',
+                  'statistics')
         model = User
+
+    def get_statistics(self, user):
+        return UserStatisticsSerializer(user).data
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
