@@ -303,7 +303,7 @@ class CloseTask(generics.UpdateAPIView):
             new_notification(user=task.implementer,
                              type='closed_task_notification',
                              affected_object_id=task.id,
-                             message=f"Автор задания {task.id} закрыл его. Вы можете оставить отзыв.",
+                             message=f"Автор задания закрыл его. Вы можете оставить отзыв.",
                              checked=0)
 
         return Response(serializer.data)
@@ -400,7 +400,7 @@ class TaskApply(generics.CreateAPIView):
         new_notification(user=task.author,
                          type='application_notification',
                          affected_object_id=task.id,
-                         message=f"На ваше задание {task.id} отправлена новая заявка",
+                         message=f"На ваше задание отправлена новая заявка",
                          checked=0)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -468,7 +468,7 @@ class CreateReview(generics.CreateAPIView):
         new_notification(user=receiver,
                          type='review_notification',
                          affected_object_id=review.task.id,
-                         message=f"Был оставлен отзыв о вас по заданию {review.task.id}",
+                         message=f"Был оставлен отзыв о вас по заданию",
                          checked=0)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
