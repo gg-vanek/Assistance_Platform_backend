@@ -12,7 +12,7 @@ class TaskFileSerializer(serializers.ModelSerializer):
         model = TaskFile
 
 
-# informational serializers
+# informational serializersа
 class TagInfoSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name',)
@@ -216,13 +216,13 @@ class SetTaskImplementerSerializer(serializers.ModelSerializer):
         new_notification(user=task.author,
                          type='set_task_implementer_notification',
                          affected_object_id=task.id,
-                         message=f"Вы успешно назначили исполнителя на задание {task.id}",
+                         message=f"Вы успешно назначили исполнителя на задание",
                          checked=0)
         # и новому исполнителю тоже уведомление
         new_notification(user=task.implementer,
                          type='application_accepted_notification',
                          affected_object_id=task.id,
-                         message=f"Вас назначили исполнителем на задание {task.id}",
+                         message=f"Вас назначили исполнителем на задание",
                          checked=0)
 
         applications = task.applications.all()
@@ -235,7 +235,7 @@ class SetTaskImplementerSerializer(serializers.ModelSerializer):
                 new_notification(user=application.applicant,
                                  type='application_rejected_notification',
                                  affected_object_id=task.id,
-                                 message=f"Ваша заявка на задание {task.id} отклонена",
+                                 message=f"Ваша заявка на задание отклонена",
                                  checked=0)
             application.save()
 
