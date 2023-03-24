@@ -11,5 +11,8 @@ python manage.py makemigrations
 echo "Apply database migrations"
 python manage.py migrate
 
+echo "Loading some default data"
+python manage.py loaddata fixtures/some_data.json
+
 echo "Runserver"
 python manage.py runserver 0.0.0.0:8000
