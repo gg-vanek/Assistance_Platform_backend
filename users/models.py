@@ -48,8 +48,7 @@ class User(AbstractUser):
     biography = models.TextField(null=True, default=None, blank=True)
 
     profile_image = models.ImageField(null=True, default=None, blank=True,
-                                      upload_to=os.path.join(settings.MEDIA_ROOT,
-                                                             f'users/user_profile_images'))
+                                      upload_to=f'users/user_profile_images')
 
     stage_of_study = models.CharField(max_length=2, choices=STAGE_OF_STUDY_CHOICES, default='N')
     course_of_study = models.IntegerField(default=1, validators=[
