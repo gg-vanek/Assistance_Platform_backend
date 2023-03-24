@@ -1,0 +1,1010 @@
+[
+  {
+    "model": "tasks.tasktag",
+    "pk": 4,
+    "fields": {
+      "name": "Помочь с презентацией"
+    }
+  },
+  {
+    "model": "tasks.tasktag",
+    "pk": 5,
+    "fields": {
+      "name": "Объяснить тему"
+    }
+  },
+  {
+    "model": "tasks.tasktag",
+    "pk": 6,
+    "fields": {
+      "name": "Объяснить задачу"
+    }
+  },
+  {
+    "model": "tasks.tasktag",
+    "pk": 7,
+    "fields": {
+      "name": "Решить задачу"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 4,
+    "fields": {
+      "name": "Русский язык"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 5,
+    "fields": {
+      "name": "Литература"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 6,
+    "fields": {
+      "name": "Химия"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 7,
+    "fields": {
+      "name": "Физика"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 8,
+    "fields": {
+      "name": "Информатика"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 9,
+    "fields": {
+      "name": "Музыка"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 10,
+    "fields": {
+      "name": "История"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 11,
+    "fields": {
+      "name": "Биология"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 12,
+    "fields": {
+      "name": "Английский язык"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 13,
+    "fields": {
+      "name": "География"
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 253,
+    "fields": {
+      "author": 3,
+      "implementer": 1,
+      "title": "Помочь решить задачу на динамическое программирование за O(nlog2(n))",
+      "price": 300,
+      "stage_of_study": "B",
+      "course_of_study": 0,
+      "subject": 8,
+      "description": "Я уже решил эту задачу за O(n^2) по времени и O(n) по памяти, но думаю есть решения лучше...",
+      "status": "P",
+      "created_at": "2023-01-22T00:17:55.576Z",
+      "updated_at": "2023-03-16T19:03:11.320Z",
+      "stop_accepting_applications_at": "2023-01-22T00:17:51Z",
+      "expires_at": "2023-01-22T00:17:52Z",
+      "closed_at": null,
+      "tags": [
+        6,
+        4,
+        7
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 254,
+    "fields": {
+      "author": 2,
+      "implementer": null,
+      "title": "Помочь с докладом по географии на тему ВГО",
+      "price": 200,
+      "stage_of_study": "C",
+      "course_of_study": 3,
+      "subject": 13,
+      "description": "У меня не получается найти информацию, по мореплавателю по имени Маркус Рилен...",
+      "status": "A",
+      "created_at": "2023-01-22T00:22:32.097Z",
+      "updated_at": "2023-03-16T19:34:27.796Z",
+      "stop_accepting_applications_at": "2023-01-22T00:00:00Z",
+      "expires_at": "2023-01-22T00:22:31Z",
+      "closed_at": null,
+      "tags": [
+        5,
+        4
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 257,
+    "fields": {
+      "author": 1,
+      "implementer": 5,
+      "title": "Помочь починить гит проекта",
+      "price": 500,
+      "stage_of_study": "M",
+      "course_of_study": 5,
+      "subject": 8,
+      "description": "Разрабатывая проект перепутал несколько команд и теперь ничего не работает, а внесенные изменения терять не хочется",
+      "status": "P",
+      "created_at": "2023-01-22T00:26:34.329Z",
+      "updated_at": "2023-03-24T16:09:45.503Z",
+      "stop_accepting_applications_at": "2023-01-22T00:00:00Z",
+      "expires_at": "2023-01-22T00:26:33Z",
+      "closed_at": null,
+      "tags": [
+        6,
+        5
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 263,
+    "fields": {
+      "author": 3,
+      "implementer": 1,
+      "title": "234",
+      "price": 1,
+      "stage_of_study": "C",
+      "course_of_study": 3,
+      "subject": 8,
+      "description": "234234",
+      "status": "P",
+      "created_at": "2023-02-22T14:45:19.105Z",
+      "updated_at": "2023-02-22T14:45:19.105Z",
+      "stop_accepting_applications_at": "2023-02-22T14:45:11Z",
+      "expires_at": "2023-02-22T14:45:12Z",
+      "closed_at": null,
+      "tags": [
+        6,
+        5
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 266,
+    "fields": {
+      "author": 4,
+      "implementer": null,
+      "title": "dgfbdfgnfgnfgbn",
+      "price": null,
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "subject": 11,
+      "description": "fgndtnfdgn",
+      "status": "A",
+      "created_at": "2023-02-22T23:28:37.067Z",
+      "updated_at": "2023-02-22T23:28:37.067Z",
+      "stop_accepting_applications_at": "2023-02-23T00:00:00Z",
+      "expires_at": "2023-03-02T02:28:37.062Z",
+      "closed_at": null,
+      "tags": [
+        6,
+        5,
+        4
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 267,
+    "fields": {
+      "author": 4,
+      "implementer": null,
+      "title": "dfbd",
+      "price": null,
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "subject": 11,
+      "description": "dfb",
+      "status": "A",
+      "created_at": "2023-02-22T23:29:09.591Z",
+      "updated_at": "2023-02-22T23:29:09.591Z",
+      "stop_accepting_applications_at": "2023-02-23T00:00:00Z",
+      "expires_at": "2023-03-02T02:29:09.582Z",
+      "closed_at": null,
+      "tags": [
+        6,
+        5
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 269,
+    "fields": {
+      "author": 1,
+      "implementer": null,
+      "title": "4574675467567",
+      "price": null,
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "subject": 8,
+      "description": "dfngaskdrhfglkujwerhgiupwetwcfhfgnskjhgnjrefhgjksdbnkjwnefgpkjngijobndfjkgndfjkgnjfgnjkdfngkjdfngjkfndgjkndfjogndfjgnosdjkfnglkjsdfnglkjsdfngjlksdfngmlksdfglksfglknsmfdglkmfsrelkgmfglkglfg te kjsfegkjdfngkjsdfngkjnfd;kjgsnsdfg",
+      "status": "A",
+      "created_at": "2023-02-25T19:28:31.305Z",
+      "updated_at": "2023-02-25T19:28:31.305Z",
+      "stop_accepting_applications_at": "2023-02-25T00:00:00Z",
+      "expires_at": "2023-03-04T22:28:31.300Z",
+      "closed_at": null,
+      "tags": [
+        5
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 270,
+    "fields": {
+      "author": 5,
+      "implementer": 1,
+      "title": "vsdfvsdfv",
+      "price": 21,
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "subject": 7,
+      "description": "svsdvsdvsdvsdfv",
+      "status": "A",
+      "created_at": "2023-03-15T19:19:41.691Z",
+      "updated_at": "2023-03-23T13:54:31.878Z",
+      "stop_accepting_applications_at": "2023-03-15T00:00:00Z",
+      "expires_at": "2023-03-22T22:19:41Z",
+      "closed_at": null,
+      "tags": [
+        6,
+        4,
+        7
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 271,
+    "fields": {
+      "author": 5,
+      "implementer": 1,
+      "title": "ergergre",
+      "price": null,
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "subject": 10,
+      "description": "rerb,erb.,eblk/eblknb",
+      "status": "P",
+      "created_at": "2023-03-23T09:45:51.878Z",
+      "updated_at": "2023-03-23T09:47:27.153Z",
+      "stop_accepting_applications_at": "2023-03-23T00:00:00Z",
+      "expires_at": "2023-03-30T12:45:51.870Z",
+      "closed_at": null,
+      "tags": [
+        5
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 272,
+    "fields": {
+      "author": 1,
+      "implementer": null,
+      "title": "ergregbrwehreth",
+      "price": null,
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "subject": 10,
+      "description": "werfgwergergerg",
+      "status": "A",
+      "created_at": "2023-03-23T13:35:16.459Z",
+      "updated_at": "2023-03-23T13:35:16.459Z",
+      "stop_accepting_applications_at": "2023-03-23T00:00:00Z",
+      "expires_at": "2023-03-30T16:35:16.447Z",
+      "closed_at": null,
+      "tags": [
+        5,
+        4,
+        7
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 277,
+    "fields": {
+      "author": 1,
+      "implementer": null,
+      "title": "сегодня",
+      "price": null,
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "subject": 12,
+      "description": "сегодня",
+      "status": "A",
+      "created_at": "2023-03-23T13:51:10.663Z",
+      "updated_at": "2023-03-23T13:51:10.663Z",
+      "stop_accepting_applications_at": "2023-03-23T00:00:00Z",
+      "expires_at": "2023-03-30T16:51:10.646Z",
+      "closed_at": null,
+      "tags": [
+        6
+      ]
+    }
+  },
+  {
+    "model": "tasks.task",
+    "pk": 278,
+    "fields": {
+      "author": 1,
+      "implementer": 5,
+      "title": "сейчас",
+      "price": null,
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "subject": 10,
+      "description": "123123",
+      "status": "P",
+      "created_at": "2023-03-23T14:08:46.106Z",
+      "updated_at": "2023-03-24T16:09:51.608Z",
+      "stop_accepting_applications_at": "2023-03-23T00:00:00Z",
+      "expires_at": "2023-03-30T17:08:46.079Z",
+      "closed_at": null,
+      "tags": [
+        5,
+        7
+      ]
+    }
+  },
+  {
+    "model": "tasks.application",
+    "pk": 14,
+    "fields": {
+      "applicant": 5,
+      "message": "привет пока",
+      "task": 257,
+      "status": "A",
+      "created_at": "2023-03-16T15:40:23.444Z",
+      "updated_at": "2023-03-23T13:54:07.070Z"
+    }
+  },
+  {
+    "model": "tasks.application",
+    "pk": 20,
+    "fields": {
+      "applicant": 5,
+      "message": "хохлы",
+      "task": 278,
+      "status": "A",
+      "created_at": "2023-03-23T14:09:42.853Z",
+      "updated_at": "2023-03-23T14:11:49.250Z"
+    }
+  },
+  {
+    "model": "tasks.application",
+    "pk": 21,
+    "fields": {
+      "applicant": 1,
+      "message": "",
+      "task": 266,
+      "status": "S",
+      "created_at": "2023-03-23T14:22:00.287Z",
+      "updated_at": "2023-03-23T14:22:00.287Z"
+    }
+  },
+  {
+    "model": "tasks.application",
+    "pk": 22,
+    "fields": {
+      "applicant": 1,
+      "message": "",
+      "task": 254,
+      "status": "S",
+      "created_at": "2023-03-23T14:22:01.715Z",
+      "updated_at": "2023-03-23T14:22:01.715Z"
+    }
+  },
+  {
+    "model": "tasks.application",
+    "pk": 23,
+    "fields": {
+      "applicant": 1,
+      "message": "",
+      "task": 270,
+      "status": "S",
+      "created_at": "2023-03-23T14:22:03.126Z",
+      "updated_at": "2023-03-23T14:22:03.126Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$390000$hkOiHIX2mr6NEWPwGYfIX8$q+96Ij/t82oO0Fwre2gVSL6RE4m+VwbPWtkJP1Cz1D8=",
+      "last_login": "2023-03-23T09:34:52.251Z",
+      "is_superuser": true,
+      "first_name": "Ваня",
+      "last_name": ".",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2023-01-16T22:43:05Z",
+      "username": "vanek",
+      "email": "vanek@site.com",
+      "biography": "...",
+      "profile_image": "",
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "phone": "88888888888",
+      "telegram": "mytg",
+      "vk": "myvk",
+      "author_rating": 7,
+      "author_review_counter": 1,
+      "author_rating_normalized": 7.0,
+      "implementer_rating": 0,
+      "implementer_review_counter": 0,
+      "implementer_rating_normalized": 0.0,
+      "show_contacts": true,
+      "send_email_notifications": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$390000$L9hwWOV9a11dI6f3yPfTXN$GUiWS/k0mDHRgmAa2WnkG1oE6xw6WogdJEUwvOlgp6o=",
+      "last_login": "2023-01-17T13:48:05Z",
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-01-16T22:43:52Z",
+      "username": "site_user",
+      "email": "site_user@site.com",
+      "biography": "",
+      "profile_image": "",
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "phone": null,
+      "telegram": null,
+      "vk": null,
+      "author_rating": 0,
+      "author_review_counter": 0,
+      "author_rating_normalized": 0.0,
+      "implementer_rating": 9,
+      "implementer_review_counter": 1,
+      "implementer_rating_normalized": 3.0,
+      "show_contacts": false,
+      "send_email_notifications": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$390000$qVCaBMKnXxStQDCzUPuJsI$aYF9F7vX87mS1DUBiwLSN4LftJ3qeKAfEMP5rPooYJ0=",
+      "last_login": "2023-01-24T18:05:36.680Z",
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-01-17T13:44:04Z",
+      "username": "shkolnik",
+      "email": "",
+      "biography": "",
+      "profile_image": "",
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "phone": null,
+      "telegram": null,
+      "vk": null,
+      "author_rating": 0,
+      "author_review_counter": 0,
+      "author_rating_normalized": 0.0,
+      "implementer_rating": 4,
+      "implementer_review_counter": 1,
+      "implementer_rating_normalized": 4.0,
+      "show_contacts": false,
+      "send_email_notifications": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$390000$lfU9GAtSNZC4fVv4T0GiWw$zFUe5dDSCXNCBg50hXYR9PjPqSHNPfNFhe6Gs6Vm+50=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-02-22T23:27:13.045Z",
+      "username": "Denis",
+      "email": "Afanasiy@mail.ru",
+      "biography": null,
+      "profile_image": "",
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "phone": null,
+      "telegram": null,
+      "vk": null,
+      "author_rating": 0,
+      "author_review_counter": 0,
+      "author_rating_normalized": 7.5,
+      "implementer_rating": 0,
+      "implementer_review_counter": 0,
+      "implementer_rating_normalized": 7.5,
+      "show_contacts": false,
+      "send_email_notifications": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$390000$kWjKjbdBQcykDRUh6R3sdG$9RJBWMxoPG/lC+CG7VqVGZV0rHKAUIYF7pbVOkKq3YA=",
+      "last_login": "2023-03-16T15:39:29.034Z",
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-03-15T19:18:11.860Z",
+      "username": "user3",
+      "email": "roma@mail.ru",
+      "biography": null,
+      "profile_image": "",
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "phone": null,
+      "telegram": null,
+      "vk": null,
+      "author_rating": 0,
+      "author_review_counter": 0,
+      "author_rating_normalized": 7.5,
+      "implementer_rating": 0,
+      "implementer_review_counter": 0,
+      "implementer_rating_normalized": 7.5,
+      "show_contacts": false,
+      "send_email_notifications": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 515,
+    "fields": {
+      "user": 1,
+      "type": "application_notification",
+      "affected_object_id": 262,
+      "message": "На ваше задание 262 отправлена новая заявка",
+      "checked": true,
+      "created_at": "2023-01-24T18:05:59.527Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 516,
+    "fields": {
+      "user": 2,
+      "type": "application_notification",
+      "affected_object_id": 254,
+      "message": "На ваше задание 254 отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-02-22T14:48:04.702Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 517,
+    "fields": {
+      "user": 4,
+      "type": "application_notification",
+      "affected_object_id": 266,
+      "message": "На ваше задание 266 отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-03-15T18:15:12.953Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 518,
+    "fields": {
+      "user": 4,
+      "type": "application_notification",
+      "affected_object_id": 267,
+      "message": "На ваше задание 267 отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-03-15T18:15:14.560Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 519,
+    "fields": {
+      "user": 1,
+      "type": "application_notification",
+      "affected_object_id": 257,
+      "message": "На ваше задание 257 отправлена новая заявка",
+      "checked": true,
+      "created_at": "2023-03-15T19:19:09.940Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 520,
+    "fields": {
+      "user": 2,
+      "type": "application_notification",
+      "affected_object_id": 254,
+      "message": "На ваше задание 254 отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-03-15T20:01:57.490Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 521,
+    "fields": {
+      "user": 1,
+      "type": "set_task_implementer_notification",
+      "affected_object_id": 257,
+      "message": "Вы успешно назначили исполнителя на задание 257",
+      "checked": true,
+      "created_at": "2023-03-15T21:02:44.373Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 522,
+    "fields": {
+      "user": 4,
+      "type": "application_accepted_notification",
+      "affected_object_id": 257,
+      "message": "Вас назначили исполнителем на задание 257",
+      "checked": false,
+      "created_at": "2023-03-15T21:02:44.377Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 523,
+    "fields": {
+      "user": 5,
+      "type": "application_rejected_notification",
+      "affected_object_id": 257,
+      "message": "Ваша заявка на задание 257 отклонена",
+      "checked": true,
+      "created_at": "2023-03-15T21:02:44.385Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 524,
+    "fields": {
+      "user": 1,
+      "type": "set_task_implementer_notification",
+      "affected_object_id": 257,
+      "message": "Вы успешно назначили исполнителя на задание 257",
+      "checked": true,
+      "created_at": "2023-03-15T21:16:35.280Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 525,
+    "fields": {
+      "user": 5,
+      "type": "application_accepted_notification",
+      "affected_object_id": 257,
+      "message": "Вас назначили исполнителем на задание 257",
+      "checked": true,
+      "created_at": "2023-03-15T21:16:35.284Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 526,
+    "fields": {
+      "user": 4,
+      "type": "application_rejected_notification",
+      "affected_object_id": 257,
+      "message": "Ваша заявка на задание 257 отклонена",
+      "checked": false,
+      "created_at": "2023-03-15T21:16:35.289Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 527,
+    "fields": {
+      "user": 3,
+      "type": "application_notification",
+      "affected_object_id": 253,
+      "message": "На ваше задание 253 отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-03-16T15:31:33.800Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 528,
+    "fields": {
+      "user": 1,
+      "type": "application_notification",
+      "affected_object_id": 257,
+      "message": "На ваше задание 257 отправлена новая заявка",
+      "checked": true,
+      "created_at": "2023-03-16T15:40:23.455Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 529,
+    "fields": {
+      "user": 1,
+      "type": "set_task_implementer_notification",
+      "affected_object_id": 257,
+      "message": "Вы успешно назначили исполнителя на задание 257",
+      "checked": true,
+      "created_at": "2023-03-16T15:52:46.149Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 530,
+    "fields": {
+      "user": 5,
+      "type": "application_accepted_notification",
+      "affected_object_id": 257,
+      "message": "Вас назначили исполнителем на задание 257",
+      "checked": true,
+      "created_at": "2023-03-16T15:52:46.154Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 531,
+    "fields": {
+      "user": 1,
+      "type": "application_notification",
+      "affected_object_id": 265,
+      "message": "На ваше задание 265 отправлена новая заявка",
+      "checked": true,
+      "created_at": "2023-03-16T15:54:16.853Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 532,
+    "fields": {
+      "user": 1,
+      "type": "set_task_implementer_notification",
+      "affected_object_id": 265,
+      "message": "Вы успешно назначили исполнителя на задание 265",
+      "checked": true,
+      "created_at": "2023-03-16T15:56:01.652Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 533,
+    "fields": {
+      "user": 5,
+      "type": "application_accepted_notification",
+      "affected_object_id": 265,
+      "message": "Вас назначили исполнителем на задание 265",
+      "checked": true,
+      "created_at": "2023-03-16T15:56:01.656Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 534,
+    "fields": {
+      "user": 3,
+      "type": "set_task_implementer_notification",
+      "affected_object_id": 253,
+      "message": "Вы успешно назначили исполнителя на задание 253",
+      "checked": false,
+      "created_at": "2023-03-16T19:03:11.325Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 535,
+    "fields": {
+      "user": 1,
+      "type": "application_accepted_notification",
+      "affected_object_id": 253,
+      "message": "Вас назначили исполнителем на задание 253",
+      "checked": true,
+      "created_at": "2023-03-16T19:03:11.328Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 536,
+    "fields": {
+      "user": 2,
+      "type": "application_notification",
+      "affected_object_id": 254,
+      "message": "На ваше задание 254 отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-03-21T21:19:37.680Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 537,
+    "fields": {
+      "user": 5,
+      "type": "application_notification",
+      "affected_object_id": 270,
+      "message": "На ваше задание 270 отправлена новая заявка",
+      "checked": true,
+      "created_at": "2023-03-23T09:44:24.015Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 538,
+    "fields": {
+      "user": 4,
+      "type": "application_notification",
+      "affected_object_id": 266,
+      "message": "На ваше задание 266 отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-03-23T09:44:28.093Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 539,
+    "fields": {
+      "user": 5,
+      "type": "application_notification",
+      "affected_object_id": 271,
+      "message": "На ваше задание 271 отправлена новая заявка",
+      "checked": true,
+      "created_at": "2023-03-23T09:46:13.992Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 540,
+    "fields": {
+      "user": 5,
+      "type": "set_task_implementer_notification",
+      "affected_object_id": 271,
+      "message": "Вы успешно назначили исполнителя на задание 271",
+      "checked": true,
+      "created_at": "2023-03-23T09:47:27.159Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 541,
+    "fields": {
+      "user": 1,
+      "type": "application_accepted_notification",
+      "affected_object_id": 271,
+      "message": "Вас назначили исполнителем на задание 271",
+      "checked": true,
+      "created_at": "2023-03-23T09:47:27.164Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 542,
+    "fields": {
+      "user": 1,
+      "type": "application_notification",
+      "affected_object_id": 278,
+      "message": "На ваше задание 278 отправлена новая заявка",
+      "checked": true,
+      "created_at": "2023-03-23T14:09:42.863Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 543,
+    "fields": {
+      "user": 1,
+      "type": "set_task_implementer_notification",
+      "affected_object_id": 278,
+      "message": "Вы успешно назначили исполнителя на задание 278",
+      "checked": true,
+      "created_at": "2023-03-23T14:11:11.667Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 544,
+    "fields": {
+      "user": 5,
+      "type": "application_accepted_notification",
+      "affected_object_id": 278,
+      "message": "Вас назначили исполнителем на задание 278",
+      "checked": true,
+      "created_at": "2023-03-23T14:11:11.670Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 545,
+    "fields": {
+      "user": 4,
+      "type": "application_notification",
+      "affected_object_id": 266,
+      "message": "На ваше задание 266 отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-03-23T14:22:00.301Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 546,
+    "fields": {
+      "user": 2,
+      "type": "application_notification",
+      "affected_object_id": 254,
+      "message": "На ваше задание 254 отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-03-23T14:22:01.718Z"
+    }
+  },
+  {
+    "model": "notifications.notification",
+    "pk": 547,
+    "fields": {
+      "user": 5,
+      "type": "application_notification",
+      "affected_object_id": 270,
+      "message": "На ваше задание отправлена новая заявка",
+      "checked": false,
+      "created_at": "2023-03-23T14:22:03.138Z"
+    }
+  }
+]
