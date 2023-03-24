@@ -305,8 +305,8 @@ def generate_tasks(request):
 
         current_task = Task(author=current_task_user,
                             title=current_task_title, price=random.randint(1, 10000),
-                            difficulty_stage_of_study=random.choice(['N', 'S', 'C', 'B', 'M', 'PG']),
-                            difficulty_course_of_study=random.randint(0, 15),
+                            stage_of_study=random.choice(['N', 'S', 'C', 'B', 'M', 'PG']),
+                            course_of_study=random.randint(0, 15),
                             subject=current_task_subject,
                             description=current_task_description,
                             status='A',
