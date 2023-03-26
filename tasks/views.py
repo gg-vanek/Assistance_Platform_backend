@@ -29,8 +29,10 @@ def filter_for_person(queryset, request):
             queryset = queryset.filter(author__username=kwarg[kwarg_key])
         elif kwarg_key == 'implementerusername':
             queryset = queryset.filter(implementer__username=kwarg[kwarg_key])
-    else:
+    elif not request.user.is_anonymous:
         queryset = queryset.filter(~Q(author=request.user))
+    else:
+        pass
     return queryset
 
 
