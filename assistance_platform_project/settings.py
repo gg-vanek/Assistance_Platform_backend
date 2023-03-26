@@ -111,7 +111,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'assistance_platform_project.wsgi.application'
 
+ALLOWED_HOSTS = ['161.35.66.125']
 CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOWED_ORIGINS = ["http://161.35.66.125:3000"]
+
 CORS_ALLOWED_ORIGINS = [
     f"http://{os.getenv('FRONTEND_HOST')}:{os.getenv('FRONTEND_PORT')}",
 ]
