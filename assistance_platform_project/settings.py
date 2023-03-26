@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 # эти три строки - так называемый monkey patching
-# проблема в том, что в джанго 4.0 убрали один метод и зщаменили его на другой,
+# проблема в том, что в джанго 4.0 убрали один метод и заменили его на другой,
 # а библиотека которая сохраняет картинки с именем хэша использует старый
 # ну собстно мы его задаем равным новому - переименованному - и все в шоколаде
 import django
@@ -40,8 +40,6 @@ if os.getenv('ENVIRONMENT') == 'PRODUCTION':
     DEBUG = False
 else:
     DEBUG = True
-
-ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -111,13 +109,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'assistance_platform_project.wsgi.application'
 
-ALLOWED_HOSTS = ['161.35.66.125']
-CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ALLOWED_ORIGINS = ["http://161.35.66.125:3000"]
 
-CORS_ALLOWED_ORIGINS = [
-    f"http://{os.getenv('FRONTEND_HOST')}:{os.getenv('FRONTEND_PORT')}",
-]
+if os.getenv('ENVIRONMENT') == 'deployed':
+    ALLOWED_HOSTS = ['161.35.66.125']
+    CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOWED_ORIGINS = ["http://161.35.66.125:3000"]
+else:
+    ALLOWED_HOSTS = []
+    CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOWED_ORIGINS = [
+        f"http://{os.getenv('FRONTEND_HOST')}:{os.getenv('FRONTEND_PORT')}",
+    ]
+
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
