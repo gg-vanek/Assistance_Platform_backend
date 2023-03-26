@@ -67,7 +67,8 @@ def filter_tasks_by_fields(queryset, tags, tags_grouping_type, task_status, stag
                 queryset = queryset.filter(tags=tag)
         else:
             return Response({'detail': f"URL parameter tags_grouping_type is '{tags_grouping_type}'"
-                                       f" but allowed values are 'and' and 'or'"},
+                                       f" but allowed values are 'and' and 'or'",
+                             'error_code': 'unknown_sorting_parameter'},
                             status=status.HTTP_400_BAD_REQUEST)
 
     if task_status is not None:
@@ -114,7 +115,8 @@ def get_filtering_by_fields_params(request):
     all_filters = getattr(request, filters_location_in_request_object)
     return {'tags': all_filters.get('tags', None),
             'tags_grouping_type': all_filters.get('tags_grouping_type', 'or'),
-            'task_status': all_filters.get('task_status', None if list(request.parser_context['kwargs'].keys()) else 'A'),
+            'task_status': all_filters.get('task_status',
+                                           None if list(request.parser_context['kwargs'].keys()) else 'A'),
             'stage_of_study': all_filters.get('stage', None),
             'course_of_study_min': all_filters.get('course_min', 0),
             'course_of_study_max': all_filters.get('course_max', 15),
@@ -321,7 +323,8 @@ class DeleteFile(generics.DestroyAPIView):
         task = Task.objects.get(id=self.request.parser_context['kwargs'].get('pk', None))
         file = TaskFile.objects.get(id=self.request.query_params['file_id'])
         if file.task != task:
-            return Response({'detail': f"Файл который вы пытаетесь удалить относится к другому заданию"})
+            return Response({'detail': f"Файл который вы пытаетесь удалить относится к другому заданию",
+                             'error_code': 'file_belongs_to_another_task'})
 
         return file
 
@@ -384,15 +387,18 @@ class TaskApply(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         if request.user == task.author:
-            return Response({'detail': "Cоздатель задачи не может быть ее исполнителем"},
+            return Response({'detail': "Cоздатель задачи не может быть ее исполнителем",
+                             'error_code': 'creator_cant_be_implementer'},
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
         if task.status != 'A':
-            return Response({'detail': f"Статус задачи {task.status}. Отправка заявок на нее недоступна"},
+            return Response({'detail': f"Статус задачи {task.status}. Отправка заявок на нее недоступна",
+                             'error_code': 'task_is_already_closed'},
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
         if Application.objects.filter(applicant=request.user, task=task):
             # если уже была такая заявка на это задание то ничего не меняем
             return Response({'detail': "Ваша заявка уже отправлена вы не можете добавить новую,"
-                                       " но можете отредактировать старую"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+                                       " но можете отредактировать старую", 'error_code': 'application_already_exists'},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         application = self.perform_create(serializer, data)
         headers = self.get_success_headers(serializer.data)
@@ -426,14 +432,17 @@ class CreateReview(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.parser_context['kwargs']['pk'])
         if task.status != 'C':
-            return Response({'detail': f"Создатель задачи еще не закрыл ее. Вы не можете оставить отзыв"},
+            return Response({'detail': f"Создатель задачи еще не закрыл ее. Вы не можете оставить отзыв",
+                             'error_code': 'task_is_not_closed_yet'},
                             status=status.HTTP_400_BAD_REQUEST)
         elif not task.implementer:
             return Response(
-                {'detail': f"На эту задачу так и не был назначен исполнитель. На нее нельзя оставлять отзывы"},
+                {'detail': f"На эту задачу так и не был назначен исполнитель. На нее нельзя оставлять отзывы",
+                 'error_code': 'task_with_no_implementer'},
                 status=status.HTTP_400_BAD_REQUEST)
         elif Review.objects.filter(task=task, reviewer=request.user):
-            return Response({'detail': f"Вы уже оставляли отзыв на эту задачу. Вы можете отредактировать старый"},
+            return Response({'detail': f"Вы уже оставляли отзыв на эту задачу. Вы можете отредактировать старый",
+                             'error_code': 'review_already_exists'},
                             status=status.HTTP_400_BAD_REQUEST)
         data = {}
         data['reviewer'] = request.user
@@ -444,7 +453,8 @@ class CreateReview(generics.CreateAPIView):
             data['review_type'] = 'I'
         else:
             # если не исполнитель и не создатель, то че за нах
-            return Response({'detail': f"Похоже вы не можете оставить отзыв на эту задачу"},
+            return Response({'detail': f"Похоже вы не можете оставить отзыв на эту задачу",
+                             'error_code': 'not_an_author_or_implementer'},
                             status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(data=request.data)
