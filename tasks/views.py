@@ -18,16 +18,17 @@ from users.models import STAGE_OF_STUDY_CHOICES, User
 
 
 def filter_for_person(queryset, request):
-    kwarg = request.parser_context['kwargs']
-    kwarg_key = list(kwarg.keys())[0]
-    if kwarg_key == 'authorid':
-        queryset = queryset.filter(author__id=kwarg[kwarg_key])
-    elif kwarg_key == 'implementerid':
-        queryset = queryset.filter(implementer__id=kwarg[kwarg_key])
-    elif kwarg_key == 'authorusername':
-        queryset = queryset.filter(author__username=kwarg[kwarg_key])
-    elif kwarg_key == 'implementerusername':
-        queryset = queryset.filter(implementer__username=kwarg[kwarg_key])
+    if request.parser_context['kwargs']:
+        kwarg = request.parser_context['kwargs']
+        kwarg_key = list(kwarg.keys())[0]
+        if kwarg_key == 'authorid':
+            queryset = queryset.filter(author__id=kwarg[kwarg_key])
+        elif kwarg_key == 'implementerid':
+            queryset = queryset.filter(implementer__id=kwarg[kwarg_key])
+        elif kwarg_key == 'authorusername':
+            queryset = queryset.filter(author__username=kwarg[kwarg_key])
+        elif kwarg_key == 'implementerusername':
+            queryset = queryset.filter(implementer__username=kwarg[kwarg_key])
     else:
         queryset = queryset.filter(~Q(author=request.user))
     return queryset
@@ -201,8 +202,7 @@ class TaskList(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Task.objects.all()
-        if self.request.parser_context['kwargs']:
-            queryset = filter_for_person(queryset, self.request)
+        queryset = filter_for_person(queryset, self.request)
 
         # фильтрация по полям
         fields_filters = get_filtering_by_fields_params(request=self.request)
