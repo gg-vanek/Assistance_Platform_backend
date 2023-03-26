@@ -1,0 +1,128 @@
+[
+  {
+    "model": "tasks.tasktag",
+    "pk": 3,
+    "fields": {
+      "name": "Лабораторная работа"
+    }
+  },
+  {
+    "model": "tasks.tasktag",
+    "pk": 4,
+    "fields": {
+      "name": "Помочь с презентацией"
+    }
+  },
+  {
+    "model": "tasks.tasktag",
+    "pk": 5,
+    "fields": {
+      "name": "Объяснить тему"
+    }
+  },
+  {
+    "model": "tasks.tasktag",
+    "pk": 6,
+    "fields": {
+      "name": "Объяснить задачу"
+    }
+  },
+  {
+    "model": "tasks.tasktag",
+    "pk": 7,
+    "fields": {
+      "name": "Решить задачу"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 1,
+    "fields": {
+      "name": "Математика"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 2,
+    "fields": {
+      "name": "Дизайн"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 3,
+    "fields": {
+      "name": "Экономика"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 4,
+    "fields": {
+      "name": "Русский язык"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 5,
+    "fields": {
+      "name": "Литература"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 6,
+    "fields": {
+      "name": "Химия"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 7,
+    "fields": {
+      "name": "Физика"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 8,
+    "fields": {
+      "name": "Информатика"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 9,
+    "fields": {
+      "name": "Музыка"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 10,
+    "fields": {
+      "name": "История"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 11,
+    "fields": {
+      "name": "Биология"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 12,
+    "fields": {
+      "name": "Английский язык"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 13,
+    "fields": {
+      "name": "География"
+    }
+  }
+]
