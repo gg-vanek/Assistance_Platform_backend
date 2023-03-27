@@ -111,8 +111,8 @@ WSGI_APPLICATION = 'assistance_platform_project.wsgi.application'
 
 
 if os.getenv('ENVIRONMENT') == 'deployed':
-    ALLOWED_HOSTS = [os.getenv('MY_SITE')]
-    CORS_ALLOWED_ORIGINS = [f"http://{os.getenv('MY_SITE')}:{os.getenv('FRONTEND_PORT')}"]
+    ALLOWED_HOSTS = ['161.35.66.125']
+    CORS_ALLOWED_ORIGINS = [f"http://161.35.66.125:{os.getenv('FRONTEND_PORT')}"]
 else:
     ALLOWED_HOSTS = []
     CORS_ORIGIN_ALLOW_ALL = True
