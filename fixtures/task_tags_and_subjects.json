@@ -1,6 +1,13 @@
 [
   {
     "model": "tasks.tasktag",
+    "pk": 2,
+    "fields": {
+      "name": "Другое"
+    }
+  },
+  {
+    "model": "tasks.tasktag",
     "pk": 3,
     "fields": {
       "name": "Лабораторная работа"
@@ -123,6 +130,13 @@
     "pk": 13,
     "fields": {
       "name": "География"
+    }
+  },
+  {
+    "model": "tasks.tasksubject",
+    "pk": 14,
+    "fields": {
+      "name": "Внеучебная деятельность"
     }
   }
 ]

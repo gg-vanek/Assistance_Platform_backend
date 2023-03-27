@@ -113,7 +113,7 @@ WSGI_APPLICATION = 'assistance_platform_project.wsgi.application'
 if os.getenv('ENVIRONMENT') == 'deployed':
     ALLOWED_HOSTS = ['161.35.66.125']
     CORS_ORIGIN_ALLOW_ALL = True
-    CORS_ALLOWED_ORIGINS = ["http://161.35.66.125:3000"]
+    CORS_ALLOWED_ORIGINS = [f"http://161.35.66.125:{os.getenv('FRONTEND_PORT')}"]
 else:
     ALLOWED_HOSTS = []
     CORS_ORIGIN_ALLOW_ALL = True
@@ -182,8 +182,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10080),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': False,
     'UPDATE_LAST_LOGIN': False,

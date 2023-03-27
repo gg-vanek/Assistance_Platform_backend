@@ -1,0 +1,35 @@
+[
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$390000$hkOiHIX2mr6NEWPwGYfIX8$q+96Ij/t82oO0Fwre2gVSL6RE4m+VwbPWtkJP1Cz1D8=",
+      "last_login": "2023-03-23T09:34:52.251Z",
+      "is_superuser": true,
+      "first_name": "Ваня",
+      "last_name": ".",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2023-01-16T22:43:05Z",
+      "username": "vanek",
+      "email": "vanek@site.com",
+      "biography": "...",
+      "profile_image": "",
+      "stage_of_study": "N",
+      "course_of_study": 1,
+      "phone": "88888888888",
+      "telegram": "mytg",
+      "vk": "myvk",
+      "author_rating": 7,
+      "author_review_counter": 0,
+      "author_rating_normalized": 7.0,
+      "implementer_rating": 0,
+      "implementer_review_counter": 0,
+      "implementer_rating_normalized": 0.0,
+      "show_contacts": true,
+      "send_email_notifications": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  }
+]
